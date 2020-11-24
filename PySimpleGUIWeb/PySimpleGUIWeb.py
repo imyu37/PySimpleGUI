@@ -1,6 +1,6 @@
 #usr/bin/python3
 
-version = __version__ = "0.39.0.1  Unreleased\n , VSeparator added (spelling error)"
+version = __version__ = "0.39.0.5  Unreleased\n , VSeparator added (spelling error), added default key for one_line_progress_meter, auto-add keys to tables & trees, Graph.draw_image now uses image_data property instead of calling set_image, added theme_add_new"
 
 port = 'PySimpleGUIWeb'
 
@@ -877,7 +877,7 @@ class Spin(Element):
 class Multiline(Element):
     def __init__(self, default_text='', enter_submits=False, disabled=False, autoscroll=False, size=(None, None),
                  auto_size_text=None, background_color=None, text_color=None, change_submits=False, enable_events=False, do_not_clear=True,
-                 key=None, focus=False, font=None, pad=None, tooltip=None, visible=True, size_px=(None,None)):
+                 key=None, write_only=False, focus=False, font=None, pad=None, tooltip=None, visible=True, size_px=(None,None)):
         '''
         Multiline Element
         :param default_text:
@@ -904,6 +904,7 @@ class Multiline(Element):
         self.Autoscroll = autoscroll
         self.Disabled = disabled
         self.ChangeSubmits = change_submits or enable_events
+        self.WriteOnly = write_only
         if size[0] is not None and size[0] < 100:
             size = size[0]*DEFAULT_PIXELS_TO_CHARS_SCALING[0], size[1]*DEFAULT_PIXELS_TO_CHARS_SCALING[1]
         self.Widget = None      # type: remi.gui.TextInput
@@ -951,6 +952,9 @@ class Multiline(Element):
 
 
     update = Update
+
+ML = Multiline
+MLine = Multiline
 
 
 # ---------------------------------------------------------------------- #
@@ -1540,7 +1544,7 @@ class SuperImage(remi.gui.Image):
         self.load(image)
 
     def load(self, file_path_name):
-        if type(file_path_name) is bytes or len(file_path_name) > 200:
+        if type(file_path_name) is bytes:
             try:
                 #here a base64 image is received
                 self.imagedata = base64.b64decode(file_path_name, validate=True)
@@ -1742,7 +1746,8 @@ class Graph(Element):
         rpoint = remi.gui.SvgImage('', converted_point[0], converted_point[0], size[0], size[1])
 
         if type(image_source) is bytes or len(image_source) > 200:
-            rpoint.set_image("data:image/svg;base64,%s"%image_source)
+            # rpoint.set_image("data:image/svg;base64,%s"%image_source)
+            rpoint.image_data = "data:image/svg;base64,%s"%image_source
         else:
             mimetype, encoding = mimetypes.guess_type(image_source)
             with open(image_source, 'rb') as f:
@@ -1750,7 +1755,8 @@ class Graph(Element):
             b64 = base64.b64encode(data)
             b64_str = b64.decode("utf-8")
             image_string = "data:image/svg;base64,%s"%b64_str
-            rpoint.set_image(image_string)
+            # rpoint.set_image(image_string)
+            rpoint.image_data = image_string
         self.SvgGroup.append([rpoint,])
         rpoint.redraw()
         self.SvgGroup.redraw()
@@ -2301,6 +2307,9 @@ class Column(Element):
 
     add_row = AddRow
     layout = Layout
+
+
+Col = Column
 
 
 # ---------------------------------------------------------------------- #
@@ -3097,6 +3106,7 @@ class Window:
                                         ELEM_TYPE_INPUT_SLIDER, ELEM_TYPE_GRAPH, ELEM_TYPE_IMAGE,
                                         ELEM_TYPE_INPUT_CHECKBOX, ELEM_TYPE_INPUT_LISTBOX, ELEM_TYPE_INPUT_COMBO,
                                         ELEM_TYPE_INPUT_MULTILINE, ELEM_TYPE_INPUT_OPTION_MENU, ELEM_TYPE_INPUT_SPIN,
+                                        ELEM_TYPE_TABLE, ELEM_TYPE_TREE,
                                         ELEM_TYPE_INPUT_TEXT):
                         element.Key = top_window.DictionaryKeyCounter
                         top_window.DictionaryKeyCounter += 1
@@ -3933,6 +3943,8 @@ def BuildResultsForSubform(form, initialize_only, top_level_form):
                     value = element.Widget.get_value()
                 elif element.Type == ELEM_TYPE_INPUT_MULTILINE:
                     element = element # type: Multiline
+                    if element.WriteOnly:
+                        continue
                     value = element.Widget.get_value()
                 elif element.Type == ELEM_TYPE_TAB_GROUP:
                     try:
@@ -5554,7 +5566,7 @@ _one_line_progress_meters = {}
 
 
 # ============================== OneLineProgressMeter  =====#
-def OneLineProgressMeter(title, current_value, max_value, key, *args, orientation=None, bar_color=(None, None),
+def OneLineProgressMeter(title, current_value, max_value, key='OK for 1 meter', *args, orientation=None, bar_color=(None, None),
                          button_color=None, size=DEFAULT_PROGRESS_BAR_SIZE, border_width=None, grab_anywhere=False):
     global _one_line_progress_meters
 
@@ -5596,7 +5608,7 @@ def OneLineProgressMeter(title, current_value, max_value, key, *args, orientatio
     return rc  # return whatever the update told us
 
 
-def OneLineProgressMeterCancel(key):
+def OneLineProgressMeterCancel(key='OK for 1 meter'):
     global _one_line_progress_meters
 
     try:
@@ -5691,6 +5703,133 @@ def EasyPrintClose():
     if _easy_print_data is not None:
         _easy_print_data.Close()
         _easy_print_data = None
+
+
+#                            d8b          888
+#                            Y8P          888
+#                                         888
+#   .d8888b 88888b.  888d888 888 88888b.  888888
+#  d88P"    888 "88b 888P"   888 888 "88b 888
+#  888      888  888 888     888 888  888 888
+#  Y88b.    888 d88P 888     888 888  888 Y88b.
+#   "Y8888P 88888P"  888     888 888  888  "Y888
+#           888
+#           888
+#           888
+
+
+CPRINT_DESTINATION_WINDOW = None
+CPRINT_DESTINATION_MULTILINE_ELMENT_KEY = None
+
+def cprint_set_output_destination(window, multiline_key):
+    """
+    Sets up the color print (cprint) output destination
+    :param window: The window that the cprint call will route the output to
+    :type window: (Window)
+    :param multiline_key: Key for the Multiline Element where output will be sent
+    :type multiline_key: (Any)
+    :return: None
+    :rtype: None
+    """
+
+    global CPRINT_DESTINATION_WINDOW, CPRINT_DESTINATION_MULTILINE_ELMENT_KEY
+
+    CPRINT_DESTINATION_WINDOW = window
+    CPRINT_DESTINATION_MULTILINE_ELMENT_KEY = multiline_key
+
+
+
+# def cprint(*args, **kwargs):
+def cprint(*args, end=None, sep=' ', text_color=None, t=None, background_color=None, b=None, colors=None, c=None, window=None, key=None):
+    """
+    Color print to a multiline element in a window of your choice.
+    Must have EITHER called cprint_set_output_destination prior to making this call so that the
+    window and element key can be saved and used here to route the output, OR used the window
+    and key parameters to the cprint function to specicy these items.
+
+    args is a variable number of things you want to print.
+
+    end - The end char to use just like print uses
+    sep - The separation character like print uses
+    text_color - The color of the text
+            key - overrides the previously defined Multiline key
+    window - overrides the previously defined window to output to
+    background_color - The color of the background
+    colors -(str, str) or str.  A combined text/background color definition in a single parameter
+
+    There are also "aliases" for text_color, background_color and colors (t, b, c)
+    t - An alias for color of the text (makes for shorter calls)
+    b - An alias for the background_color parameter
+    c - Tuple[str, str] - "shorthand" way of specifying color. (foreground, backgrouned)
+    c - str - can also be a string of the format "foreground on background"  ("white on red")
+
+    With the aliases it's possible to write the same print but in more compact ways:
+    cprint('This will print white text on red background', c=('white', 'red'))
+    cprint('This will print white text on red background', c='white on red')
+    cprint('This will print white text on red background', text_color='white', background_color='red')
+    cprint('This will print white text on red background', t='white', b='red')
+
+    :param *args: stuff to output
+    :type *args: (Any)
+    :param text_color: Color of the text
+    :type text_color: (str)
+    :param background_color: The background color of the line
+    :type background_color: (str)
+    :param colors: Either a tuple or a string that has both the text and background colors
+    :type colors: (str) or Tuple[str, str]
+    :param t: Color of the text
+    :type t: (str)
+    :param b: The background color of the line
+    :type b: (str)
+    :param c: Either a tuple or a string that has both the text and background colors
+    :type c: (str) or Tuple[str, str]
+    :param end: end character
+    :type end: (str)
+    :param sep: separator character
+    :type sep: (str)
+    :param key: key of multiline to output to (if you want to override the one previously set)
+    :type key: (Any)
+    :param window: Window containing the multiline to output to (if you want to override the one previously set)
+    :type window: (Window)
+    :return: None
+    :rtype: None
+    """
+
+    destination_key = CPRINT_DESTINATION_MULTILINE_ELMENT_KEY if key is None else key
+    destination_window = window or CPRINT_DESTINATION_WINDOW
+
+    if (destination_window is None and window is None) or (destination_key is None and key is None):
+        print('** Warning ** Attempting to perform a cprint without a valid window & key',
+              'Will instead print on Console',
+              'You can specify window and key in this cprint call, or set ahead of time using cprint_set_output_destination')
+        print(*args)
+        return
+
+    kw_text_color = text_color or t
+    kw_background_color = background_color or b
+    dual_color = colors or c
+    try:
+        if isinstance(dual_color, tuple):
+            kw_text_color = dual_color[0]
+            kw_background_color = dual_color[1]
+        elif isinstance(dual_color, str):
+            kw_text_color = dual_color.split(' on ')[0]
+            kw_background_color = dual_color.split(' on ')[1]
+    except Exception as e:
+        print('* cprint warning * you messed up with color formatting', e)
+
+    mline = destination_window.find_element(destination_key, silent_on_error=True)      # type: Multiline
+    try:
+        # mline = destination_window[destination_key]     # type: Multiline
+        if end is None:
+            mline.print(*args, text_color=kw_text_color, background_color=kw_background_color, end='', sep=sep)
+            mline.print('')
+        else:
+            mline.print(*args,text_color=kw_text_color, background_color=kw_background_color, end=end, sep=sep)
+    except Exception as e:
+        print('** cprint error trying to print to the multiline. Printing to console instead **', e)
+        print(*args, end=end, sep=sep)
+
 
 
 # ------------------------------------------------------------------------------------------------ #
@@ -7125,6 +7264,22 @@ def theme_list():
     return list_of_look_and_feel_values()
 
 
+def theme_add_new(new_theme_name, new_theme_dict):
+    """
+    Add a new theme to the dictionary of themes
+
+    :param new_theme_name: text to display in element
+    :type new_theme_name: (str)
+    :param new_theme_dict: text to display in element
+    :type new_theme_dict: (dict)
+    """
+    global LOOK_AND_FEEL_TABLE
+    try:
+        LOOK_AND_FEEL_TABLE[new_theme_name] = new_theme_dict
+    except Exception as e:
+        print('Exception during adding new theme {}'.format(e))
+
+
 def theme_previewer(columns=12):
     """
     Show a window with all of the color themes - takes a while so be patient
@@ -7979,7 +8134,7 @@ def main():
         # [OptionMenu([])],
         [T('System platform = %s'%sys.platform)],
         [Image(data=DEFAULT_BASE64_ICON, enable_events=False)],
-        # [Image(filename=r'C:\Python\PycharmProjects\GooeyGUI\logo500.png', key='-IMAGE-')],
+        # [Image(filename=r'C:\Python\PycharmProjects\PSG\logo500.png', key='-IMAGE-')],
         VerLine(ver, 'PySimpleGUI Version'),
         VerLine(os.path.dirname(os.path.abspath(__file__)), 'PySimpleGUI Location'),
         VerLine(sys.version, 'Python Version', size=(60,2)),
@@ -7995,7 +8150,7 @@ def main():
         [Combo(values=['Combo 1', 'Combo 2', 'Combo 3'], default_value='Combo 2', key='_COMBO_', enable_events=True,
                readonly=False, tooltip='Combo box', disabled=False, size=(12, 1))],
         [Listbox(values=('Listbox 1', 'Listbox 2', 'Listbox 3'), enable_events =True, size=(10, 3), key='_LIST_')],
-        # [Image(filename=r'C:\Python\PycharmProjects\GooeyGUI\logo200.png', enable_events=False)],
+        # [Image(filename=r'C:\Python\PycharmProjects\PSG\logo200.png', enable_events=False)],
         [Slider((1, 100), default_value=80, key='_SLIDER_', visible=True, enable_events=True, orientation='v')],
         [Spin(values=(1, 2, 3), initial_value='2', size=(4, 1), key='_SPIN_', enable_events=True)],
         [OK(), Button('Hidden', visible=False, key='_HIDDEN_'), Button('Values'), Button('Exit', button_color=('white', 'red')), Button('UnHide'), B('Popup')]

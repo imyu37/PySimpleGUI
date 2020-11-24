@@ -16,7 +16,6 @@
 ![GitHub issues](https://img.shields.io/github/issues-raw/PySimpleGUI/PySimpleGUI?color=blue)  ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/PySimpleGUI/PySimpleGUI?color=blue)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/PySimpleGUI/PySimpleGUI.svg?style=for-the-badge)](../../commits/master)
 [![Last commit](https://img.shields.io/github/last-commit/PySimpleGUI/PySimpleGUI.svg?style=for-the-badge)](../../commits/master)
-![CodeFactor](https://www.codefactor.io/repository/github/PySimpleGUI/PySimpleGUI/badge)
 
 # PySimpleGUI User's Manual
 
@@ -1120,7 +1119,7 @@ Like above, you may have to install either pip or tkinter.  To do this on Python
 
 `sudo apt install python-tkinter`
 
-### Upgrading from GitHub Using PySimpleGUI
+## Upgrading from GitHub Using PySimpleGUI
 
 Starting in version 4.17.0 there is code in the PySimpleGUI package that upgrades your previously pip installed package using the latest version checked into GitHub.  
 
@@ -1447,7 +1446,10 @@ Popup(args=*<1 or N object>,
     no_titlebar=False,
     grab_anywhere=False,
     keep_on_top=False,
-    location=(None, None))
+    location=(None, None),
+    any_key_closes=False,
+    image=None,
+    modal=True)
 ```
 
 Parameter Descriptions:
@@ -1456,7 +1458,7 @@ Parameter Descriptions:
 |--|--|--|
 |                     Any                      |        *args        | Variable number of your arguments. Load up the call with stuff to see! |
 |                     str                      |        title        | Optional title for the window. If none provided, the first arg will be used instead. |
-|               Tuple[str, str]                |    button_color     | Color of the buttons shown (text color, button color) |
+|         Union[Tuple[str, str], None]         |    button_color     | Color of the buttons shown (text color, button color) |
 |                     str                      |  background_color   | Window's background color |
 |                     str                      |     text_color      | text color |
 |                     int                      |     button_type     | NOT USER SET! Determines which pre-defined buttons will be shown (Default value = POPUP_BUTTONS_OK). There are many Popup functions and they call Popup, changing this parameter to get the desired effect. |
@@ -1470,6 +1472,10 @@ Parameter Descriptions:
 |                     bool                     |     no_titlebar     | If True will not show the frame around the window and the titlebar across the top |
 |                     bool                     |    grab_anywhere    | If True can grab anywhere to move the window. If no_titlebar is True, grab_anywhere should likely be enabled too |
 |               Tuple[int, int]                |      location       | Location on screen to display the top left corner of window. Defaults to window centered on screen |
+|                     bool                     |     keep_on_top     | If True the window will remain above all current windows |
+|                     bool                     |   any_key_closes    | If True then will turn on return_keyboard_events for the window which will cause window to close as soon as any key is pressed. Normally the return key only will close the window. Default is false. |
+|                str) or (bytes                |        image        | Image to include at the top of the popup window |
+|                     bool                     |        modal        | If True then makes the popup will behave like a Modal window... all other windows are non-operational until this one is closed. Default = True |
 | Union[str, None] | **RETURN** | Returns text of the button that was pressed.  None will be returned if user closed window with X
 
 The other output Popups are variations on parameters.  Usually the button_type parameter is the primary one changed.
@@ -1508,22 +1514,32 @@ popup_scrolled(args=*<1 or N object>,
     no_titlebar=False,
     grab_anywhere=False,
     keep_on_top=False,
-    font=None)
+    font=None,
+    image=None,
+    modal=True)
 ```
 
 Parameter Descriptions:
 
 |Type|Name|Meaning|
 |--|--|--|
-|        Any        |        *args        | Variable number of items to display |
-|        str        |        title        | Title to display in the window. |
-|  Tuple[str, str]  |    button_color     | button color (foreground, background) |
-|       bool        |       yes_no        | If True, displays Yes and No buttons instead of Ok |
-|       bool        |     auto_close      | if True window will close itself |
-| Union[int, float] | auto_close_duration | Older versions only accept int. Time in seconds until window will close |
-|  Tuple[int, int]  |        size         | (w,h) w=characters-wide, h=rows-high |
-|  Tuple[int, int]  |      location       | Location on the screen to place the upper left corner of the window |
-|       bool        |    non_blocking     | if True the call will immediately return rather than waiting on user input |
+|             Any             |        *args        | Variable number of items to display |
+|             str             |        title        | Title to display in the window. |
+|   Tuple[str, str] or str    |    button_color     | button color (foreground, background) |
+|            bool             |       yes_no        | If True, displays Yes and No buttons instead of Ok |
+|            bool             |     auto_close      | if True window will close itself |
+|      Union[int, float]      | auto_close_duration | Older versions only accept int. Time in seconds until window will close |
+|         (int, int)          |        size         | (w,h) w=characters-wide, h=rows-high |
+|       Tuple[int, int]       |      location       | Location on the screen to place the upper left corner of the window |
+|            bool             |    non_blocking     | if True the call will immediately return rather than waiting on user input |
+|             str             |  background_color   | color of background |
+|             str             |     text_color      | color of the text |
+|            bool             |     no_titlebar     | If True no titlebar will be shown |
+|            bool             |    grab_anywhere    | If True, than can grab anywhere to move the window (Default = False) |
+|            bool             |     keep_on_top     | If True the window will remain above all current windows |
+| Union[str, Tuple[str, int]] |        font         | specifies the font family, size, etc |
+|       str) or (bytes        |        image        | Image to include at the top of the popup window |
+|            bool             |        modal        | If True then makes the popup will behave like a Modal window... all other windows are non-operational until this one is closed. Default = True |
 | Union[str, None, TIMEOUT_KEY] | **RETURN** | Returns text of the button that was pressed.  None will be returned if user closed window with X
 
 Typical usage:
@@ -1564,7 +1580,9 @@ popup_no_wait(args=*<1 or N object>,
     no_titlebar=False,
     grab_anywhere=False,
     keep_on_top=False,
-    location=(None, None))
+    location=(None, None),
+    image=None,
+    modal=False)
 ```
 
 Parameter Descriptions:
@@ -1574,7 +1592,7 @@ Parameter Descriptions:
 |             Any             |        *args        | Variable number of items to display |
 |             str             |        title        | Title to display in the window. |
 |             int             |     button_type     | Determines which pre-defined buttons will be shown (Default value = POPUP_BUTTONS_OK). |
-|       Tuple[str, str]       |    button_color     | button color (foreground, background) |
+|   Tuple[str, str] or str    |    button_color     | button color (foreground, background) |
 |             str             |  background_color   | color of background |
 |             str             |     text_color      | color of the text |
 |            bool             |     auto_close      | if True window will close itself |
@@ -1586,6 +1604,9 @@ Parameter Descriptions:
 |            bool             |     no_titlebar     | If True no titlebar will be shown |
 |            bool             |    grab_anywhere    | If True: can grab anywhere to move the window (Default = False) |
 |       Tuple[int, int]       |      location       | Location of upper left corner of the window |
+|       str) or (bytes        |        image        | Image to include at the top of the popup window |
+|            bool             |        modal        | If True then makes the popup will behave like a Modal window... all other windows are non-operational until this one is closed. Default = False |
+| Union[str, None] | **RETURN** | Reason for popup closing
 
 The `popup` call `popup_no_wait` or `popup_non_blocking` will create a popup window and then immediately return control back to you.  You can turn other popup calls into non-blocking popups if they have a `non_blocking` parameter.  Setting `non_blocking` to True will cause the function to return immediately rather than waiting for the window to be closed.
 
@@ -1624,27 +1645,31 @@ popup_get_text(message,
     no_titlebar=False,
     grab_anywhere=False,
     keep_on_top=False,
-    location=(None, None))
+    location=(None, None),
+    image=None,
+    modal=True)
 ```
 
 Parameter Descriptions:
 
 |Type|Name|Meaning|
 |--|--|--|
-|             str             |     message      | (str) message displayed to user |
-|             str             |      title       | (str) Window title |
-|             str             |   default_text   | (str) default value to put into input area |
-|             str             |  password_char   | (str) character to be shown instead of actually typed characters |
-|       Tuple[int, int]       |       size       | (width, height) of the InputText Element |
-|       Tuple[str, str]       |   button_color   | Color of the button (text, background) |
-|             str             | background_color | (str) background color of the entire window |
-|             str             |    text_color    | (str) color of the message text |
+|             str             |     message      | message displayed to user |
+|             str             |      title       | Window title |
+|             str             |   default_text   | default value to put into input area |
+|             str             |  password_char   | character to be shown instead of actually typed characters |
+|         (int, int)          |       size       | (width, height) of the InputText Element |
+|   Tuple[str, str] or str    |   button_color   | Color of the button (text, background) |
+|             str             | background_color | background color of the entire window |
+|             str             |    text_color    | color of the message text |
 |      Union[bytes, str]      |       icon       | filename or base64 string to be used for the window's icon |
 | Union[str, Tuple[str, int]] |       font       | specifies the font family, size, etc |
-|            bool             |   no_titlebar    | (bool) If True no titlebar will be shown |
-|            bool             |  grab_anywhere   | (bool) If True can click and drag anywhere in the window to move the window |
-|            bool             |   keep_on_top    | (bool) If True the window will remain above all current windows |
+|            bool             |   no_titlebar    | If True no titlebar will be shown |
+|            bool             |  grab_anywhere   | If True can click and drag anywhere in the window to move the window |
+|            bool             |   keep_on_top    | If True the window will remain above all current windows |
 |       Tuple[int, int]       |     location     | (x,y) Location on screen to display the upper left corner of window |
+|       str) or (bytes        |      image       | Image to include at the top of the popup window |
+|            bool             |      modal       | If True then makes the popup will behave like a Modal window... all other windows are non-operational until this one is closed. Default = True |
 | Union[str, None] | **RETURN** | Text entered or None if window was closed or cancel button clicked
 
 ```python
@@ -1682,7 +1707,9 @@ popup_get_file(message,
     grab_anywhere=False,
     keep_on_top=False,
     location=(None, None),
-    initial_folder=None)
+    initial_folder=None,
+    image=None,
+    modal=True)
 ```
 
 Parameter Descriptions:
@@ -1697,8 +1724,8 @@ Parameter Descriptions:
 |            bool             |  multiple_files   | if True, then allows multiple files to be selected that are returned with ';' between each filename |
 |    Tuple[Tuple[str,str]]    |    file_types     | List of extensions to show using wildcards. All files (the default) = (("ALL Files", "*.*"),) |
 |            bool             |     no_window     | if True, no PySimpleGUI window will be shown. Instead just the tkinter dialog is shown |
-|       Tuple[int, int]       |       size        | (width, height) of the InputText Element |
-|       Tuple[str, str]       |   button_color    | Color of the button (text, background) |
+|         (int, int)          |       size        | (width, height) of the InputText Element |
+|   Tuple[str, str] or str    |   button_color    | Color of the button (text, background) |
 |             str             | background_color  | background color of the entire window |
 |             str             |    text_color     | color of the text |
 |      Union[bytes, str]      |       icon        | filename or base64 string to be used for the window's icon |
@@ -1708,6 +1735,8 @@ Parameter Descriptions:
 |            bool             |    keep_on_top    | If True the window will remain above all current windows |
 |       Tuple[int, int]       |     location      | Location of upper left corner of the window |
 |             str             |  initial_folder   | location in filesystem to begin browsing |
+|       str) or (bytes        |       image       | Image to include at the top of the popup window |
+|            bool             |       modal       | If True then makes the popup will behave like a Modal window... all other windows are non-operational until this one is closed. Default = True |
 | Union[str, None] | **RETURN** | string representing the file(s) chosen, None if cancelled or window closed with X
 
 If configured as an Open File Popup then (save_as is not True)  the dialog box will look like this. 
@@ -1750,7 +1779,9 @@ popup_get_folder(message,
     grab_anywhere=False,
     keep_on_top=False,
     location=(None, None),
-    initial_folder=None)
+    initial_folder=None,
+    image=None,
+    modal=True)
 ```
 
 Parameter Descriptions:
@@ -1761,8 +1792,8 @@ Parameter Descriptions:
 |             str             |      title       | Window title |
 |             str             |   default_path   | path to display to user as starting point (filled into the input field) |
 |            bool             |    no_window     | if True, no PySimpleGUI window will be shown. Instead just the tkinter dialog is shown |
-|       Tuple[int, int]       |       size       | (width, height) of the InputText Element |
-|       Tuple[str, str]       |   button_color   | button color (foreground, background) |
+|         (int, int)          |       size       | (width, height) of the InputText Element |
+|   Tuple[str, str] or str    |   button_color   | button color (foreground, background) |
 |             str             | background_color | color of background |
 |             str             |    text_color    | color of the text |
 |      Union[bytes, str]      |       icon       | filename or base64 string to be used for the window's icon |
@@ -1772,6 +1803,8 @@ Parameter Descriptions:
 |            bool             |   keep_on_top    | If True the window will remain above all current windows |
 |       Tuple[int, int]       |     location     | Location of upper left corner of the window |
 |             str             |  initial_folder  | location in filesystem to begin browsing |
+|       str) or (bytes        |      image       | Image to include at the top of the popup window |
+|            bool             |      modal       | If True then makes the popup will behave like a Modal window... all other windows are non-operational until this one is closed. Default = True |
 | Union[str, None] | **RETURN** | string representing the path chosen, None if cancelled or window closed with X
 
 This is a typical call
@@ -1840,7 +1873,7 @@ We all have loops in our code.  'Isn't it joyful waiting, watching a counter scr
 one_line_progress_meter(title,
     current_value,
     max_value,
-    key,
+    key="OK for 1 meter",
     args=*<1 or N object>,
     orientation="v",
     bar_color=(None, None),
@@ -1855,18 +1888,18 @@ Parameter Descriptions:
 
 |Type|Name|Meaning|
 |--|--|--|
-|          str           |     title     | text to display in eleemnt |
-|          int           | current_value | current value |
-|          int           |   max_value   | max value of QuickMeter |
-| Union[str, int, tuple] |      key      | Used with window.FindElement and with return values to uniquely identify this element |
-|          Any           |     *args     | stuff to output |
-|          str           |  orientation  | 'horizontal' or 'vertical' ('h' or 'v' work) (Default value = 'vertical' / 'v') |
-|    Tuple(str, str)     |   bar_color   | color of a bar line |
-|    Tuple[str, str]     | button_color  | button color (foreground, background) |
-|    Tuple[int, int]     |     size      | (w,h) w=characters-wide, h=rows-high (Default value = DEFAULT_PROGRESS_BAR_SIZE) |
-|          int           | border_width  | width of border around element |
-|          bool          | grab_anywhere | If True: can grab anywhere to move the window (Default = False) |
-|          bool          |  no_titlebar  | If True: no titlebar will be shown on the window |
+|              str               |     title     | text to display in eleemnt |
+|              int               | current_value | current value |
+|              int               |   max_value   | max value of QuickMeter |
+| Union[str, int, tuple, object] |      key      | Used to differentiate between mutliple meters. Used to cancel meter early. Now optional as there is a default value for single meters |
+|              Any               |     *args     | stuff to output |
+|              str               |  orientation  | 'horizontal' or 'vertical' ('h' or 'v' work) (Default value = 'vertical' / 'v') |
+|        Tuple(str, str)         |   bar_color   | color of a bar line |
+|     Tuple[str, str] or str     | button_color  | button color (foreground, background) |
+|           (int, int)           |     size      | (w,h) w=characters-wide, h=rows-high (Default value = DEFAULT_PROGRESS_BAR_SIZE) |
+|              int               | border_width  | width of border around element |
+|              bool              | grab_anywhere | If True: can grab anywhere to move the window (Default = False) |
+|              bool              |  no_titlebar  | If True: no titlebar will be shown on the window |
 | (bool) | **RETURN** | True if updated successfully. False if user closed the meter with the X or Cancel button
 
 Here's the one-line Progress Meter in action!
@@ -2555,15 +2588,91 @@ You have a couple of options for dealing this with.  If your operation can be br
 
 If, on the other hand, your operation is not under your control or you are unable to add `Refresh` calls, then the next option available to you is to move your long operations into a thread.
 
+### The "Old Way"
+
 There are a couple of demo programs available for you to see how to do this.  You basically put your work into a thread.  When the thread is completed, it tells the GUI by sending a message through a queue.  The event loop will run with a timer set to a value that represents how "responsive" you want your GUI to be to the work completing.  
 
-These 2 demo programs are called
-```python
-Demo_Threaded_Work.py - Best documented.  Single thread used for long task
-Demo_Multithreaded_Long_Tasks.py - Similar to above, but with less fancy GUI. Allows you to set amount of time
-```
+### The "New Way" - `Window.write_event_value`
 
-These 2 particular demos have a LOT of comments showing you where to add your code, etc..  The amount of code to do this is actually quite small and you don't need to understand the mechanisms used if you simply follow the demo that's been prepared for you.
+This new function that is available currently only in the tkinter port as of July 2020 is exciting and represents the future way multi-threading will be handled in PySimpleGUI (or so is hoped).
+
+Previously, a queue was used where your event loop would **poll** for incoming messages from a thread.
+
+Now, threads can directly inject events into a Window so that it will show up in the `window.read()` calls.  This allows a your event loop to "pend", waiting for normal window events as well as events being generated by threads.
+
+You can see this new capability in action in this demo:  Demo_Multithreaded_Write_Event_Value.py
+
+Here is that program for your inspection and education.  It's SO nice to no longer poll for threaded events.
+
+```python
+import threading
+import time
+import PySimpleGUI as sg
+
+"""
+    Threaded Demo - Uses Window.write_event_value communications
+
+    Requires PySimpleGUI.py version 4.25.0 and later
+
+    This is a really important demo  to understand if you're going to be using multithreading in PySimpleGUI.
+
+    Older mechanisms for multi-threading in PySimpleGUI relied on polling of a queue. The management of a communications
+    queue is now performed internally to PySimpleGUI.
+
+    The importance of using the new window.write_event_value call cannot be emphasized enough.  It will hav a HUGE impact, in
+    a positive way, on your code to move to this mechanism as your code will simply "pend" waiting for an event rather than polling.
+
+    Copyright 2020 PySimpleGUI.org
+"""
+
+THREAD_EVENT = '-THREAD-'
+
+cp = sg.cprint
+
+def the_thread(window):
+    """
+    The thread that communicates with the application through the window's events.
+
+    Once a second wakes and sends a new event and associated value to the window
+    """
+    i = 0
+    while True:
+        time.sleep(1)
+        window.write_event_value('-THREAD-', (threading.current_thread().name, i))      # Data sent is a tuple of thread name and counter
+        cp('This is cheating from the thread', c='white on green')
+        i += 1
+
+def main():
+    """
+    The demo will display in the multiline info about the event and values dictionary as it is being
+    returned from window.read()
+    Every time "Start" is clicked a new thread is started
+    Try clicking "Dummy" to see that the window is active while the thread stuff is happening in the background
+    """
+
+    layout = [  [sg.Text('Output Area - cprint\'s route to here', font='Any 15')],
+                [sg.Multiline(size=(65,20), key='-ML-', autoscroll=True, reroute_stdout=True, write_only=True, reroute_cprint=True)],
+                [sg.T('Input so you can see data in your dictionary')],
+                [sg.Input(key='-IN-', size=(30,1))],
+                [sg.B('Start A Thread'), sg.B('Dummy'), sg.Button('Exit')]  ]
+
+    window = sg.Window('Window Title', layout, finalize=True)
+
+    while True:             # Event Loop
+        event, values = window.read()
+        cp(event, values)
+        if event == sg.WIN_CLOSED or event == 'Exit':
+            break
+        if event.startswith('Start'):
+            threading.Thread(target=the_thread, args=(window,), daemon=True).start()
+        if event == THREAD_EVENT:
+            cp(f'Data from the thread ', colors='white on purple', end='')
+            cp(f'{values[THREAD_EVENT]}', colors='white on red')
+    window.close()
+
+if __name__ == '__main__':
+    main()
+```
 
 ### Multithreaded Programs
 
@@ -2682,7 +2791,25 @@ theme_previewer
 
 The first step is to create the window object using the desired window customizations.  
 
-Note - There is no direct support for "**modal windows**" in PySimpleGUI.  All windows are accessible at all times unless you manually change the windows' settings.
+## Modal Windows (only applied to tkinter port currently
+)
+NOTE - as of PySimpleGUI 4.25.0 Modal Windows are supported!  By default the `popup` windows that block will be marked Modal by default.  This is a somewhat risky change because your expisting applications will behave differently. However, in theory, you shouldn't have been interacting with other windows while the popup is active.  All of those actions are at best queued.  It's implementation dependent.
+
+"Modal" in this case means that you must close this "modal" window before you will be able to interact with windows created before this window.  Think about an "about" box.  You normally have to close this little popup in most programs.  So, that's what PySimpleGUI is doing now.
+
+## Making your window modal
+
+To make a Modal  Wio=ndow you have 2 options.  
+
+1. Set the `moodel=True` parameter in your Window calls.
+
+2. Call the method `Window.make_modal()` to chance a window from non-modal to modal.  There is no modal to non-modal.  Don't see the need for one. If one comes up, sure!
+
+### Disabling modal windows
+
+Popups that block are the only windows that have modal on by default. There is a modal parameter than you  can set to False to turn it off.
+
+For the earlier than 4.25.0 and other ports of PySimpleGUI There is no direct support for "**modal windows**" in PySimpleGUI.  All windows are accessible at all times unless you manually change the windows' settings.
 
 **IMPORTANT** - Many of the `Window` methods require you to either call `Window.read` or `Window.Finalize` (or set `finalize=True` in your `Window` call) before you call the method. This is because these 2 calls are what actually creates the window using the underlying GUI Framework.  Prior to one of those calls, the methods are likely to crash as they will not yet have their underlying widgets created.
 
@@ -3307,6 +3434,150 @@ Then to turn off return values for that element, the `Multiline` element would b
 
 ```python
 sg.Multiline(size=(40,8), key='-MLINE-' + sg.WRITE_ONLY_KEY)
+```
+
+## Key Errors - Key error recovery algorithm
+
+In the primary (tkinter) port of PySimpleGUI, starting in version 4.27.0 (not yet on PyPI... but available on GitHub as 4.26.0.14+)
+
+There are now 3 controls over key error handling and a whole new era of key reporting.
+
+```python
+SUPPRESS_ERROR_POPUPS = False
+SUPPRESS_RAISE_KEY_ERRORS = False
+SUPPRESS_KEY_GUESSING = False
+```
+
+You can modify these values by calling `set_options`.
+
+```python
+    sg.set_options(suppress_raise_key_errors=False, suppress_error_popups=False, suppress_key_guessing=False)
+```
+
+A basic definition of them are:
+`suppress_error_popups` - Disables error popups that are generated within PySimpleGUI itself to not be shown
+`suppress_raise_key_errors` - Disables raising a key error if a key or a close match are not found
+`suppress_key_guessing` - Disables the key guessing algorithm should you have a key error
+
+With the defaults left as defined (all `False`), here is how key errors work.
+
+This is the program being used in this example:
+
+```python
+import PySimpleGUI as sg
+
+def main():
+    sg.set_options(suppress_raise_key_errors=False, suppress_error_popups=False, suppress_key_guessing=False)
+
+    layout = [  [sg.Text('My Window')],
+                [sg.Input(k='-IN-'), sg.Text(size=(12,1), key='-OUT-')],
+                [sg.Button('Go'), sg.Button('Exit')]  ]
+
+    window = sg.Window('Window Title', layout, finalize=True)
+
+    while True:             # Event Loop
+        event, values = window.read()
+        print(event, values)
+        if event == sg.WIN_CLOSED or event == 'Exit':
+            break
+        window['-O U T'].update(values['-IN-'])
+    window.close()
+
+def func():
+
+    main()
+
+func()
+```
+
+A few things to note about it:
+
+* There are multiple levels of functions being called, not just a flat program
+* There are 2 keys explicitly defined, both are text at this point (we'll change them later)
+* There are 2 lookups happening, one with `window` the other with `values`
+
+This key error recovery algorithm only applies to element keys being used to lookup keys inside of windows.  The `values` key lookup is a plain dictionary and so nothing fancy is done for that lookup.
+
+### Example 1 - Simple text string misspelling
+
+In our example, this line of code has an error:
+
+```python
+window['-O U T'].update(values['-IN-'])
+```
+
+There are multiple problems with the key `'-OUT-'`.  It is missing a dash and it has a bunch of extra spaces.
+
+When the program runs, you'll first see the layout with no apparent problems:
+
+![SNAG-0882](https://user-images.githubusercontent.com/46163555/88704649-60954800-d0dc-11ea-885a-1ebadba039b7.jpg)
+
+Clicking the OK button will cause the program to return from `window.read()` and thus hit our bad key.  The result will be a popup window that resembles this:
+
+![SNAG-0883](https://user-images.githubusercontent.com/46163555/88704635-5bd09400-d0dc-11ea-88a2-42e7386b076b.jpg)
+
+Note a few things about this error popup.  Your shown your bad key and you're also shown what you likely meant.  Additionally, you're shown the filename, the line number and the line of code itself that has the error.
+
+Because this error was recoverable, the program continues to run after you close the error popup.  The result is what you expect from this program... the output field is the same as your information input.
+
+![SNAG-0884](https://user-images.githubusercontent.com/46163555/88704691-71de5480-d0dc-11ea-8800-9379044a3f1f.jpg)
+
+### Example 2 - Tuple error
+
+Keys can be a variety of types, including tuples.  In this particular program we have a tuple specified in the layout and have used an incorrect tuple in the lookup.  Once again the recovery process worked and the program continued.
+
+![SNAG-0885](https://user-images.githubusercontent.com/46163555/88705188-2d9f8400-d0dd-11ea-9a91-f92cef9f6219.jpg)
+
+### Example 3 - No close match found
+
+In this example, as you can see in the error popup, there was such a mismatch that no substitution could be performed.  
+
+![SNAG-0886](https://user-images.githubusercontent.com/46163555/88705707-e6fe5980-d0dd-11ea-8fcc-bc024298705d.jpg)
+
+This is an unrecoverable error, so a key error exception is raised.
+
+```python
+
+Traceback (most recent call last):
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 25, in <module>
+    func()
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 23, in func
+    main()
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 17, in main
+    window[(1,2,3)].update(values['-IN-'])
+  File "C:\Python\PycharmProjects\PSG\PySimpleGUI.py", line 8591, in __getitem__
+    return self.FindElement(key)
+  File "C:\Python\PycharmProjects\PSG\PySimpleGUI.py", line 7709, in FindElement
+    raise KeyError(key)
+KeyError: (1, 2, 3)
+```
+
+If you're running an IDE such as PyCharm, you can use the information from the assert to jump to the line of code in your IDE based on the crash data provided.
+
+### Choose Your Desired Combination
+
+There are enough controls on this error handling that you can control how you want your program to fail.  If you don't want any popups, and no guessing and would instead like to simply get an exception when the key error happens, then call `set_options` with this combination:
+
+```python
+    sg.set_options(suppress_raise_key_errors=False, suppress_error_popups=True, suppress_key_guessing=True)
+```
+
+This will cause Example #1 above to immediately get an exception when hitting the statement with the error.  Even though the guessing is turned off, you're still provided with the closest match to help with your debugging....
+
+```
+** Error looking up your element using the key:  -O U T The closest matching key:  -OUT-
+Traceback (most recent call last):
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 25, in <module>
+    func()
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 23, in func
+    main()
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 17, in main
+    window['-O U T'].update(values['-IN-'])
+  File "C:\Python\PycharmProjects\PSG\PySimpleGUI.py", line 8591, in __getitem__
+    return self.FindElement(key)
+  File "C:\Python\PycharmProjects\PSG\PySimpleGUI.py", line 7709, in FindElement
+    raise KeyError(key)
+KeyError: '-O U T'
 ```
 
 ## Common Element Parameters
@@ -4164,9 +4435,9 @@ sg.Popup(event, values, line_width=200)
 
 ```
 
-### Column, Frame, Tab, Window element_justification
+## Columns As a Way to Modify Elements
 
-Beginning in Release 4.3 you can set the justification for any container element.  This is done through the `element_justification` parameter.  This will greatly help anyone that wants to center all of their content in a window.  Previously it was difficult to do these kinds of layouts, if not impossible.
+Sometimes Columns are used to contain a single elemnet, but to give that elemously it was difficult to do these kinds of layouts, if not impossible.
 
 justify the `Column` element's row by setting the `Column`'s `justification` parameter.
 
@@ -5578,6 +5849,386 @@ Exception module 'tkinter' has no attribute '__version__'
 ```
 ---
 
+# User Settings API
+
+In release 4.30.0 there is a new set of API calls available to help with "user settings".  Think of user settings as a dictionary that is automatically written to your hard drive.  That's basically what it is.  Underpinning the code is the JSON package provided by Python.
+
+While using JSON files to save and load a settings dictionary isn't very difficult, it is still code you'll need to write if you want to save settings as part of your GUI.  Since having "settings" for a GUI based program isn't uncommon, it made sense to build this capability into PySimpleGUI.  Clearly you can still use your own method for saving settings, but if you're looking for a simple and easy way to do it, these calls are likely about as easy as it gets.
+
+There have already been some demo programs written that use JSON files to store settings.  You can expect that this capability will begin to show up in more demos in the future since it's now part of PySimpleGUI.
+
+User settings are stored in a Python dictionary which is saved to / loaded from disk.  Individual settings are thus keys into a dictionary.  You do not need to explicitly read nor write the file.  Changing any entry will cause the file to be saved.  Reading any entry will cause the file to be read if it hasn't already been read.  
+
+## Two Interfaces
+
+There are 2 ways to access User Settings
+
+1. User Settings function calls
+2. The `UserSettings` class
+
+They both offer the same basic operations.  The class interface has an added benefit of being able to access the individual settings using the same syntax as Python dictionary.
+
+## List of Calls for Function Interface
+
+|Function|Description|
+| ---  | --- |
+|user_settings|Returns settings as a dictionary|
+|user_settings_delete_entry|Deletes a setting|
+|user_settings_delete_filename|Deletes the settings file|
+|user_settings_file_exists|Returns True if settings file specified exists|
+|user_settings_filename|Returns full path and filename of current settings file|
+|user_settings_get_entry|Returns value for a setting. If no setting found, then specified default value is returned|
+|user_settings_load|Loads dictionary from the settings file. This is not normally needed||
+|user_settings_save|Saves settings to current or newly specified file. Not normally needed|
+|user_settings_set_entry|Sets an entry to a particular value
+|user_settings_write_new_dictionary|Writes a specified dictionary to settings file|
+
+## Operations
+
+There are 2 categories that the calls can be divided into.
+
+1. File operations
+2. Settings operations
+
+File operations involve working with the JSON file itself.  They include:
+* Setting the path and/or filename
+* Load/save the file (these are somewhat optional as the saving loading/saving is done automatically)
+* Deleting the settings file
+* Checking if settings file exists
+
+Generally speaking, a setting is specified with a key which is generally a string.  Settings operations are for working with the individual settings and include:
+* Get the value of a setting (returns a default value if not found)
+* Set the value of a setting (also saves the settings to disk)
+
+Any setting operation may cause the file to be written. This is because a "get" operation can include returning a default value if the setting isn't found.  This means a new entry is made in your settings dictionary is one didn't exist before.  Since a new entry is made, that means it needs to be also be written to disk.
+
+## Filenames
+
+The settings filename defaults the filename of your Python file making the call with the extension ".json" added.  If your Python program is called `test.py` then your default settings filename will be `test.json`.
+
+In addition to the filename having a default value, the path to the file also has a default value.  The default depends on your operating system.
+
+|Operating System|Default Path|
+| ---  | --- |
+| Windows | \user\user_name\AppData\Local\PySimpleGUI\settings |
+| Linux | ~/.config/PySimpleGUI/settings |
+| Mac | ~/Library/Application Support/PySimpleGUI/settings |
+
+When calling the User Settings APIs, if a parameter is named `filename`, you can specify a full path or just the filename.  This will save you the trouble of having to split up your path and filename in your code.  If you specify only the path, the the filename will be added to that path and named as defined earlier.
+
+Like the rest of PySimpleGUI, the idea is for you to write as little code as possible.  The default values for the filename and path should be fine for you to use.  They will be stored in a location on your system that is meant to store user settings.  
+
+### Setting Filename
+
+If you want to see what the current filename is for your settings, then you can call `user_settings_filename()` with no parameters and you'll get back an absolute path and filename.
+
+To make the code for specifying the folder and filename as simple as possible, the 2 parts are separated in the call specifying the name of the settings file.  However, it is possible to supply a full and complete folder + filename as well.
+
+The default filename for your settings file is the name of the file that makes the call to the User Settings API's with the `.py` extension changed to a `.json` extension. If your source file is called `demo.py`,  then your settings filename will be `demo.json`.  
+
+#### Setting only the filename
+
+If you want to control the name of the file and/or the path to the settings file, then you will use the `user_settings_filename` call.  This function takes 2 parameters.
+
+```python
+user_settings_filename(filename=None, path=None)
+```
+
+If you set only the path, then the filename will default to the value already described.  If you set only the filename, then the path will be the default path is dependent on your operating system.  See the table above for the locations for each OS.
+
+```python
+import PySimpleGUI as sg
+
+sg.user_settings_filename(filename='my_settings.json')
+print(sg.user_settings_filename())
+```
+
+If you are running on Windows, then the result of running this code will be this printed on the console:
+
+```
+C:\Users\your_use_name\AppData\Local\PySimpleGUI\settings\my_settings.json
+```
+
+You are not restricted to naming your settings file to an extension of .json.  That is simply the default extension that's used by PySimpleGUI.  You can use any extension you would like, including no extension.
+
+#### Setting only the path
+
+Maybe you don't care about the settings filename itself, but you do care about where the settings are stored.  Let's say you want the settings to be stored in the same folder as your Python source file.  Specifying `path='.'` will achieve this.
+
+#### Setting a fully qualified filename
+
+If you want to specify the full absolute path and filename of the settings file, you can do it by using the filename parameter.  Instead of passing the filename only, pass in a fully qualified path and filename.  If you want to name your settings file `a:\temp\my_settings`, then your call will look like this:
+
+```python
+sg.user_settings_filename(filename=r'a:\temp\my_settings')
+```
+
+You are not required to break your file down into 2 parameters.  You could if you wanted to however.  The equivalent to the above call using 2 parameters would be:
+
+```python
+sg.user_settings_filename(filename='my_settings' , path=r'a:\temp')
+```
+
+### Getting the current filename
+
+Calling `user_settings_filename` with no parameters will return the full path and filename of your settings file as a single string.
+
+### File Loading / Saving
+
+Generally speaking you will not need to load or save your settings file.  It is automatically saved after every change.  
+
+Note that reading a setting can also cause the file to be written.  If you read a setting and the setting did not exist, then your call to `user_settings_get_entry` will return the default value you specified.  As a result, the dictionary is updated with this default value and in return the file is written with this value as well.
+
+One of the situations where you may want to explicitly read/load the settings file is if you're expecting it to be modified by another program.
+
+Like so much of PySimpleGUI, as much as possible is automatically done on your behalf.  This includes the requirement of saving and loading your settings file.  Even naming your settings file is optional.  
+
+## The `UserSettings` Class Interface
+
+The `UserSettings` class makes working with settings look like a Python dictionary.  The familiar [ ] syntax is used to read, write and delete entries.
+
+### Creating a `UserSettings` Object
+
+The first step is to create your setting object.  The parameters are the same as calling the `user_settings_filename` function.  If you want to use the default values, then leave the parameters unchanged.
+
+```python
+settings = sg.UserSettings()
+```
+
+This is the same as calling `sg.user_settings_filename()`
+
+### Reading, Writing, and Deleting an Individual Settings Using [ ] Syntax
+
+The first operation will be to create the User Settings object.
+
+```python
+settings = sg.UserSettings()
+```
+
+To read a setting the dictionary-style [ ] syntax is used.  If the item's name is `'-item-'`, then reading the value is achieved by writing
+
+```python
+item_value = settings['-item-']
+```
+
+Writing the setting is the same syntax except the expression is reversed.
+
+```python
+settings['-item-'] = new_value
+```
+
+To delete an item, again the dictionary style syntax is used.
+
+```python
+del settings['-item-']
+```
+
+You can also call the delete_entry method to delete the entry.
+
+```python
+settings.delete_entry('-item-')
+```
+
+### `UserSettings` Methods
+
+You'll find all of the `UserSettings` methods available to you detailed in the Call Reference documentation.
+
+One operation in particular that is not achievable using the [ ] notation is a "get" operation with a default value.  For dictionaries, this method is `get` and for the `UserSettings` class the method is also called `get`.  They both have an optional second parameter that represents a "default value" should the key not be found in the dictionary.
+
+If you would like a setting with key `'-item-'` to return an empty string `''` instead of `None` if they key isn't found, then you can use this code to achieve that:
+
+```python
+value = settings.get('-item-', '')
+```
+
+It's the same kind of syntax that you're used to using with dictionaries.
+
+### Default Value
+
+Normally the default value will be `None` if a key is not found and you get the value of the entry using the bracket format:
+
+```python
+item_value = settings['-item-']
+```
+
+You can change the default value by calling `settings.set_default_value(new_default)`.  This will set the default value to return in the case when no key is found.  Note that an exception is not raised when there is a key error (see next section on error handling).  Instead, the default value is returned with a warning displayed.
+
+## Displaying the Settings Dictionary
+
+The class interface makes it easy to dump out the dictionary.  If you print the UserSettings object you'll get a printout of the dictionary.
+
+Note that you'll need to "load" the settings from disk if you haven't performed any operations on the settings.
+
+```python
+settings = sg.UserSettings()
+settings.load()
+print(settings)
+```
+
+If you were to print the dictionary after creating the object, then the `load` is not needed
+
+```python
+settings = sg.UserSettings()
+print(settings['-item-'])
+print(settings)
+```
+
+To print the dictionary using the function call interface:
+
+```python
+print(sg.user_settings())
+```
+
+## Error Handling for User Settings
+
+From a GUI perspective, user settings are not critical to the GUI operations itself.  There is nothing about settings that will cause your window to not function.  As a result, errors that occur in the User Settings are "soft errors".  An error message is displayed along with information about how you called the function, when possible, and then execution continues.
+
+One reason for treating these as soft errors and thus not raising an exception is that raising an exception will crash your GUI.  If you have redirected your output, which many GUIs do, then you will see no error information and your window will simply disappear.  If you double clicked a .py file to launch your GUI, both the GUI and the console window will instantly disappear if the GUI crashes, leaving you no information to help you debug the problem.
+
+The only time errors can occur are during file operations.  Typically these errors happen because you've specified a bad path or you don't have write permission for the path you specified.
+
+Example error message.  If you executed this code:
+
+```python
+def main():
+    sg.user_settings_filename(path='...')
+    sg.user_settings_set_entry('-test-',123)
+```
+
+Then you'll get an error when trying to set the '-test-' entry because `'...'` is not a valid path.
+
+```
+*** Error saving settings to file:***
+ ...\scratch_1065.json [Errno 2] No such file or directory: '...\\scratch_1065.json'
+The PySimpleGUI internal reporting function is save
+The error originated from:
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_1065.py"
+line 8
+in main
+    sg.user_settings_set_entry('-test-',123)
+```
+
+You should be able to easily figure out these errors as they are file operations and the error messages are clear in detailing what's happened and where the call originated.
+
+### Silenting the Errors
+
+If you're the type that doesn't want to see any error messages printed out on your console, then you can silence the error output. 
+
+When using the class interface, there is a parameter `silent_on_error` that you can set to `True`.
+
+For the function interface, call the function `user_settings_silent_on_error()` and set the parameter to `True`
+
+## Coding Convention for User Settings Keys
+
+The User Settings prompted a new coding convention that's been added to PySimpleGUI examples.  As you're likely aware, keys in layouts have the format `'-KEY-`'.  For UserSettings, a similar format is used, but instead of the string being in all upper case, the characters are lower case.  In the example below, the user setting for "filename" has a User Setting key of `'-filename-'`.  Coding conventions are a good thing to have in your projects.  You don't have to follow this one of course, but you're urged to create your own for places in your code that it makes sense.  You could say that PEP8 is one giant coding convention for the Python language as a whole.  You don't have to follow it, but most Python programmers do.  We follow it "by convention".
+
+The reason this is done in PySimpleGUI is so that the keys are immediately recognizable.  Perhaps your application has dictionaries that you use.  If you follow the PySimpleGUI coding convention of Element keys have the format `'-KEY-'` and User Settings keys have the format of `'-key-'`, then you'll immediately understand what a specific key is used for.  Your company may have its own coding conventions so follow those if appropriate instead of what you see in the PySimpleGUI examples.
+
+## Example User Settings Usage
+
+One of the primary places settings are likely to be used is for filenames / folder names.  How many times have you run the same program and needed to enter the same filename?  Even if the name of the file is on your clipboard, it's still a pain in the ass to paste it into the input field every time you run the code.  Wouldn't it be so much simpler if your program remembered the last value you entered?  Well, that's exactly why this set of APIs was developed.... again it was from laziness that this capability gained life.
+
+If you want your `Input` elements to default to an entry from your settings, then you simply set the first parameter (`default_text`) to the value of a setting from your settings file.
+
+Let's say your layout had this typical file input row:
+
+```python
+[sg.Input(key='-IN-'), sg.FileBrowse()]
+```
+
+To automatically fill in the `Input` to be the last value entered, use this layout row:
+
+```python
+[sg.Input(sg.user_settings_get_entry('-filename-', ''), key='-IN-'), sg.FileBrowse()]
+```
+
+When your user clicks OK or closes the window in a way that is in a positive way (instead of cancelling), then add this statement to save the value.
+
+```python
+sg.user_settings_set_entry('-filename-', values['-IN-'])
+```
+
+Here's an entire program demonstrating this way of using user settings
+
+![image](https://user-images.githubusercontent.com/46163555/96048583-cde78800-0e44-11eb-87fe-c2465e1b6cf8.png)
+
+```python
+import PySimpleGUI as sg
+
+layout = [[sg.Text('Enter a filename:')],
+          [sg.Input(sg.user_settings_get_entry('-filename-', ''), key='-IN-'), sg.FileBrowse()],
+          [sg.B('Save'), sg.B('Exit Without Saving', key='Exit')]]
+
+window = sg.Window('Filename Example', layout)
+
+while True:
+    event, values = window.read()
+    if event in (sg.WINDOW_CLOSED, 'Exit'):
+        break
+    elif event == 'Save':
+        sg.user_settings_set_entry('-filename-', values['-IN-'])
+
+window.close()
+```
+
+In 2 lines of code you've just made life for your user so much easier.  And, by not specifying a location and name for your file, the settings are stored out of sight / out of mind.  If you wanted to have the settings be stored with your program file so that it's more visible, then add this statement before your layout:
+
+```python
+sg.user_settings_filename(path='.')
+```
+
+## Example Using UserSettings Class with [ ] Syntax
+
+The same example can be written using the `UserSettings` class and the [ ] lookup syntax.
+
+Here's the same program as above.
+
+```python
+import PySimpleGUI as sg
+
+settings = sg.UserSettings()
+
+layout = [[sg.Text('Enter a filename:')],
+          [sg.Input(settings.get('-filename-', ''), key='-IN-'), sg.FileBrowse()],
+          [sg.B('Save'), sg.B('Exit Without Saving', key='Exit')]]
+
+window = sg.Window('Filename Example', layout)
+
+while True:
+    event, values = window.read()
+    if event in (sg.WINDOW_CLOSED, 'Exit'):
+        break
+    elif event == 'Save':
+        settings['-filename-'] = values['-IN-']
+
+window.close()
+```
+
+If you were to place these 2 examples in the same file so that one ran after the other, you will find that the same settings file is used and thus the value saved in the first example will be read by the second one.  
+
+There was one additional line of code added:
+
+```python
+settings.set_default_value('')      # Set the default not-found value to ''
+
+```
+
+Strictly speaking, this line isn't needed because the Input Element now takes `None` to be the same as a value of `''`, but to produce identical results I added this line of code.
+
+## Demo Programs
+
+There are a number of demo programs that show how to use UserSettings to create a richer experience for your users by remember the last value input into input elements or by adding a Combobox with a history of previously entered values.  These upgrades make for a much easier to use GUI, especially when you find yourself typing in the same values or using the same files/folders.
+
+## Brief Caution - User Settings Stick Around
+
+If you're using the default path, remember that previous runs of your file may have old settings that are still in your settings file.  It can get confusing when you've forgotten that you previously wrote a setting.  Not seeing the filename can have drawbacks like this.
+
+Also, because the settings automatically save after every update, it can be easy to accidently overwrite a previously saved setting.  If you want to avoid this, then perhaps it's best that you work with a dictionary within your code and then explicitly save your dictionary when you're ready to commit it to disk.  
+
+To save your Python dictionary to a settings file, simply call `user_settings_write_new_dictionary(dict)`, passing in your dictionary as the parameter.
+
+-------------------------
+
 # Extending PySimpleGUI
 
 PySimpleGUI doesn't and can't provide every single setting available in the underlying GUI framework.  Not all tkinter options are available for a `Text` Element.  Same with PySimpleGUIQt and the other ports.  
@@ -5815,6 +6466,10 @@ Run this command on your Mac
 
 > pyinstaller --onefile --add-binary='/System/Library/Frameworks/Tk.framework/Tk':'tk' --add-binary='/System/Library/Frameworks/Tcl.framework/Tcl':'tcl' your_program.py
 
+Another also mentioned it may be helpful to add the "windowed" option so that a console is not opened.  That should make the command:
+
+> pyinstaller --onefile --add-binary='/System/Library/Frameworks/Tk.framework/Tk':'tk' --windowed --add-binary='/System/Library/Frameworks/Tcl.framework/Tcl':'tcl' your_program.py
+
 This info was located on Reddit with the source traced back to:
 https://github.com/pyinstaller/pyinstaller/issues/1350
 
@@ -6027,9 +6682,9 @@ If you've created a GitHub for your project that uses PySimpleGUI then please po
 | 2.7.0 | July 30, 2018 - realtime buttons, window_location default setting
 | 2.8.0 | Aug 9, 2018 - New None default option for Checkbox element, text color option for all elements, return values as a dictionary, setting focus, binding return key
 | 2.9.0 | Aug 16,2018 - Screen flash fix, `do_not_clear` input field option, `autosize_text` defaults to `True` now, return values as ordered dict, removed text target from progress bar, rework of return values and initial return values, removed legacy Form.Refresh() method (replaced by Form.ReadNonBlockingForm()), COLUMN elements!!, colored text defaults
-| 2.10.0 | Aug 25, 2018 - Keyboard & Mouse features (Return individual keys as if buttons, return mouse scroll-wheel as button, bind return-key to button, control over keyboard focus), SaveAs Button, Update & Get methods for InputText, Update for Listbox, Update & Get for Checkbox, Get for Multiline, Color options for Text Element Update, Progess bar Update can change max value, Update for Button to change text & colors, Update for Image Element, Update for Slider, Form level text justification, Turn off default focus, scroll bar for Listboxes, Images can be from filename or from in-RAM, Update for Image).  Fixes - text wrapping in buttons, msg box, removed slider borders entirely and others
-| 2.11.0 | Aug 29, 2018 - Lots of little changes that are needed for the demo programs to work. Buttons have their own default element size, fix for Mac default button color, padding support for all elements, option to immediately return if list box gets selected, FilesBrowse button, Canvas Element, Frame Element, Slider resolution option, Form.Refresh method, better text wrapping, 'SystemDefault' look and feel settin
-| 2.20.0 | Sept 4, 2018 - Some sizable features this time around of interest to advanced users.  Renaming of the MsgBox functions to Popup. Renaming GetFile, etc, to PopupGetFile. High-level windowing capabilities start with Popup, PopupNoWait/PopupNonblocking, PopupNoButtons, default icon, change_submits option for Listbox/Combobox/Slider/Spin/, New OptionMenu element, updating elements after shown, system defaul color option for progress bars, new button type (Dummy Button) that only closes a window, SCROLLABLE Columns!! (yea, playing in the Big League now), LayoutAndShow function removed, form.Fill - bulk updates to forms, FindElement - find element based on key value (ALL elements have keys now), no longer use grid packing for row elements (a potentially huge change), scrolled text box sizing changed, new look and feel themes (Dark, Dark2, Black, Tan, TanBlue, DarkTanBlue, DarkAmber, DarkBlue, Reds, Green)
+| 2.10.0 | Aug 25, 2018 - Keyboard & Mouse features (Return individual keys as if buttons, return mouse scroll-wheel as button, bind return-key to button, control over keyboard focus), SaveAs Button, Update & Get methods for InputText, Update for Listbox, Update & Get for Checkbox, Get for Multiline, Color options for Text Element Update, Progress bar Update can change max value, Update for Button to change text & colors, Update for Image Element, Update for Slider, Form level text justification, Turn off default focus, scroll bar for Listboxes, Images can be from filename or from in-RAM, Update for Image).  Fixes - text wrapping in buttons, msg box, removed slider borders entirely and others
+| 2.11.0 | Aug 29, 2018 - Lots of little changes that are needed for the demo programs to work. Buttons have their own default element size, fix for Mac default button color, padding support for all elements, option to immediately return if list box gets selected, FilesBrowse button, Canvas Element, Frame Element, Slider resolution option, Form.Refresh method, better text wrapping, 'SystemDefault' look and feel setting
+| 2.20.0 | Sept 4, 2018 - Some sizable features this time around of interest to advanced users.  Renaming of the MsgBox functions to Popup. Renaming GetFile, etc, to PopupGetFile. High-level windowing capabilities start with Popup, PopupNoWait/PopupNonblocking, PopupNoButtons, default icon, change_submits option for Listbox/Combobox/Slider/Spin/, New OptionMenu element, updating elements after shown, system default color option for progress bars, new button type (Dummy Button) that only closes a window, SCROLLABLE Columns!! (yea, playing in the Big League now), LayoutAndShow function removed, form.Fill - bulk updates to forms, FindElement - find element based on key value (ALL elements have keys now), no longer use grid packing for row elements (a potentially huge change), scrolled text box sizing changed, new look and feel themes (Dark, Dark2, Black, Tan, TanBlue, DarkTanBlue, DarkAmber, DarkBlue, Reds, Green)
 | 2.30.0 | Sept 6, 2018 - Calendar Chooser (button), borderless windows, load/save form to disk
 | 3.0.0 | Sept 7, 2018 - The "fix for poor choice of 2.x numbers" release. Color Chooser (button), "grab anywhere" windows are on by default, disable combo boxes, Input Element text justification (last part needed for 'tables'), Image Element changes to support OpenCV?, PopupGetFile and PopupGetFolder have better no_window option
 | 3.01.01 | Sept 10, 2018 - Menus! (sort of a big deal)
@@ -7227,17 +7882,332 @@ Fixes and new features... broad range
 * Tree now uses the element's padding rather than 0,0
 * set_options - added ability to set the tooltip font
 * Fixed a couple of docstrings
-* Reworked main() test harness to dispay DETAILED tkinter info and use bettter colors
+* Reworked main() test harness to display DETAILED tkinter info and use better colors
 
-### Upcoming
+## 4.21.0 PySimpleGUI 27-Jun-2020
 
-There will always be overlapping work as the ports will never actually be "complete" as there's always something new that can be built.  However there's a definition for the base functionality for PySimpleGUI.  This is what is being strived for with the currnt ports that are underway.
+Horizontal Separator, cprint, docstrings
 
-The current road ahead is to complete these ports - Qt (very close), Web (pretty close), Wx (not all that close).
+* New color printing function cprint - enables easy color printing to an element
+* Tons of docstring fixups (300+ changes)
+* Removed old Python2 checks
+* Added Element.set_vscroll_position - scroll to a particular % of the way into a scrollable widget
+* Input Text - new parameters
+	* border_width
+	* read_only (for tkinter will have to be disabled OR readonly.  Cannot be both)
+	* disabled_readonly_background_color
+	* disabled_readonly_text_color
+* Radio - Backed out the change that cleared all buttons in group because already have that ability using reset_group
+* Graph drag mouse up events returned as either a string + "+UP" (as before) or as a tuple with "+UP" being added onto a tuple key
+* Vertical separator - added key and color - color defaults to text color
+* Horizontal separator!  (FINALLY). Color defaults to text color
+* Fix for Table and Tree elements not automatically getting a key generated if one wasn't supplied
+* Made key parameter for one_line_progress_meter have a default value so don't have to specify it when you have only 1 running
+* theme_add_new - adds a new theme entry given a theme name and a dictionary entry. This way you don't have to directly modify the theme dictionary
+* Added initial_folder to popup_get_folder when there is no window
+* Added default_path to popup_get_file when there is no window
+* Fix for removing too many PySimpleGUI installs when using the GitHub upgrade tooltip
 
-PySimpleGUIDroid is in the works....
+## 4.22.0 PySimpleGUI 28-Jun-2020
 
-In addition to the ports there is ongoing work with educators that want to bring PySimpleGUI into their classrooms.  Some projects have already started with teachers.  One effort is to examine a number of books that teach Python to kids and convert the exercises to use PySimpleGUI instead of tkinter or command line.  Another educational effort is in integrating with Circuit Python.  It's unclear exactly how PySimpleGUI will fit into the picture.  A board from Adafruit is arriving soon which should help solidify what's possible.
+More cprint stuff
+
+* Additional window and key parameter to cprint
+	* May seem like a small change, but the results are powerful
+	* Can now easily "print" to anywhere, in color!
+	
+
+## 4.23.0 PySimpleGUI 3-Jul-2020
+
+Table Colors Fix - workaround for problems with tables and tree colors in Python 3.7.2 to 3.9+
+Mac crash fixed - tkinter.TclError: expected boolean value but got "" (hopefully)
+New shortcut "k" parameter for all elements that is the same as "key" - may be experimental / temporary if not well received
+More error checks
+popup extensions
+
+* Fix for missing Table and Tree colors created in tk 8.6.9
+	* This is a problem in all versions of  Python 3.7.2 - 3.9.0 with no target fix date published
+	* As a result of no fixes in sight, added a fix in PySimpleGUI if the tk version is 8.6.9
+* New Element creation parameter "k" - exact same thing as "key" but shorter. Helps with complex layouts
+* New error reporting on all element.update calls - checks to see if element has been fully created
+* set_options - new option to supress popup_errors coming from PySimpleGUI.py
+* Mac specific crash fix - if on a Mac, no longer calling wm_overrideredirect as it crashes the Mac now
+* Additional error checking (shows error instead of asserting:
+	* Check for Widget creation before widget operations like bind, unbind, expand
+	* Check for window finalize / read before some window operations like maximize, hide, etc
+* docstrings - more added.  Fixed up a number of missing / erroneous ones
+* Tree element - caches images so that will not create new ones if previously used on another Tree item
+* popup - two new options
+	* any_key_closes - bool.  If True, any key pressed will close the window
+	* image - can be a bytes (base64) or string (filename). Image will be shown at top of the popup
+* all popups - new image parameter (base64 or string)
+* a few new built-in icons
+	
+
+## 4.24.0 PySimpleGUI 3-Jul-2020
+
+Selective control over tk 8.6.9 treeview color patch
+
+* Disabled the code that patched the problem with background colors for Tree and Table elements
+* Can enable the patched code by calling set_options
+	* To enable set parameter enable_treeview_869_patch = True (defaults to false)
+
+## 4.25.0 PySimpleGUI 17-Jul-2020
+
+Biggest / most impactful set of changes in a while (fingers crossed)
+Modal windows
+Multithreaded Window.write_event_value method
+stdout re-route to any Multiline
+table/tree highlights
+k element parameter
+
+* New "k" parameter for all elements. 
+	* Same as "key"
+	* Created so layouts can be even more compact if desired
+	* New docstring for keys (basically anything except a list)
+* Popups
+	* New text wrap behavior. Will wrap text between \n in user's string
+	* All popups are now "modal" unless they are non-blocking (can be turned off using new parameter)
+* New button color and table/tree highlight color format
+	* Colors can still be tuple (text, background)
+	* Can also be a single string with format "text on background" (e.g. "white on red")
+* Multiline
+	* Automatically refresh window when updating multiline or output elements
+	* For cprint use Multiline's autoscroll setting
+	* New autoscroll parameter in Multiline.print
+	* New parameters to make the print and cprint stuff much easier
+		* write_only=False (so that it's not returned when read)
+		* auto_refresh=False
+		* reroute_stdout=False
+		* reroute_stderr=False
+		* reroute_cprint=False (removes need to call the cprint cprint_set_output_destination function)
+* Table / Tree Elements
+	* Re-enabled the tk 8.6.9 background color fix again
+	* selected_row_colors=(None, None) - tuple or string
+	* Automatically sets the selected row color based on the theme colors! (uses the button color)
+	* Can use 2 other constants for colors
+		* OLD_TABLE_TREE_SELECTED_ROW_COLORS - ('#FFFFFF', '#4A6984') the old blueish color
+		* ALTERNATE_TABLE_AND_TREE_SELECTED_ROW_COLORS - (SystemHighlightText, SystemHighlight)
+	* Tree image caching happens at the element level now
+* Window	
+	* make_modal - new method to turn a window into a modal window
+	* modal parameter when window is created.  Default is False
+	* write_event_value - new method that can be called by threads!  This will "queue" an event and a value for the next window.read()
+	* Display an error popup if read a closed window 100+ times (stops you from eating 100% of the CPU time)
+	* was_closed method added - returns True if a window has been closed
+* Combo - don't select first entry if updated with a new set of values
+* Tooltip - fix for stuck-on tooltips
+* New theme_previewer with scrollbars. 3 new parameters	
+* cprint - now has all parameters shown in docstring versus using *args **kwargs	
+* New global variable __tclversion_detailed__ - string with full tkinter version (3 numbers instead of 2)
+* Warning is displayed if tcl version is found to be 8.5.
+
+## 4.26.0 PySimpleGUI 18-Jul-2020
+
+* Multi-threaded tkvar initialization location changed so that thread doesn't intialize it now
+* Removed thread key - no longer needed
+* Window.write_event_values - now requires both parms
+* Upgrade button typo
+
+## 4.27.4 PySimpleGUI 3-Aug-2020
+
+Multi-window support done right!
+New capabilities for printing, Multiline
+Main app additions
+Theme searching
+
+* read_all_windows - function that reads all currently open windows.
+	* Finally the efficient multi-window solution
+	* No longer need to do round-robin type scheduling
+	* Easily convert existing programs from single to multi-windows
+	* Demo programs with multi-window design patterns all updated
+	* Ideal for "floating palette / toolbar" window adds-ons
+	* Can read with timeout including timeout=0
+* theme_previewer
+	* search option
+	* button in main app
+	* reset to previous theme following preview
+* Sponsor button in main app
+* Theme previewer in main app
+* Progress bar 
+	* colors can use the single string "foreground on background" color format
+	* update_bar combined with update for a single update interface
+* Better element key error handling
+	* 3 options to control how lookup errors are handled
+	* popup now shows
+		* file, function, line #, actual line of code with error
+		* erroneous key provided
+		* best matching key
+	* will automatically try to continue with best matching key
+	* can assert with key error if desired (true by default)
+* fix for get item
+* Up/down arrow bindings for spinner if enabling events
+* Multiline 
+	* new justification parameter on creation and update
+	* print - justification parameter added
+* cprint - justification parameter added - note tricky to set color of single word but possible	
+* Added mousewheel for Linux return_keyboard_events enabled
+* Added get_globals function for extending easier
+* Refactored callbacks
+* Image element - can clear image by not setting any parameters when calling update
+* Column Element's Widget member variable now being set
+* Window's starting window location saved
+* Early experimental "Move all windows in sync" when using grab_anywhere (coming soon)
+* Fix for 3.4 (can't use f-strings)
+
+## 4.28.0 PySimpleGUI 3-Aug-2020
+
+Element pinning for invisibility!
+
+* Better visible/invisible handling
+	* pin - new function to place an element in a layout that will hold its position
+	* border_width added to Canvas and Graph (so that they will default to 0)
+* Combobox
+	* button color will match theme's button color
+	* background color set correctly when readonly indicated
+* Spin element
+	* spin button color set to background color of spinner
+	* spin arrow color automatically set to text color
+* Bad element key popup - fix for displaying correct line info in some situations
+
+## 4.29.0 PySimpleGUI 25-Aug-2020
+
+Custom titlebar capabilities (several new features required)
+Better Alignment
+Calendar button works again
+
+* Window.visiblity_changed now refreshes the window 
+* Added Column.contents_changed which will update the scrollbar so corrently match the contents
+* Separators expand only in 1 direction now
+* Added 8 SYMBOLS:
+	SYMBOL_SQUARE = '█'
+	SYMBOL_CIRCLE = '⚫'
+	SYMBOL_CIRCLE_OUTLINE = '◯'
+	SYMBOL_UP =    '▲'
+	SYMBOL_RIGHT = '►'
+	SYMBOL_LEFT =  '◄'
+	SYMBOL_DOWN =  '▼'
+	SYMBOL_X = '❎'
+* New dark themes - dark grey 8, dark grey 9, dark green 9, dark purple 7
+* When closing window no longer deletes the tkroot variable and rows but instead set to None
+* Changd no-titlebar code to use try/except. Previously removed for Mac due to tk 8.6.10 errors calling wm_overrideredirect
+* Fix for Column/window element justification
+* New vertical_alignment parm for Column, Frame, pin
+* New layout helper functions - vtop/vcenter/vbottom - Can pass an element or a row of elements
+* Fixed statusbar expansion
+* Added disabled button to theme previewer
+* Fixed grab anywhere stop motion bug - was setting position to None and causing error changed to event.x
+* Expanded main to include popup tests, theme tests, ability to hide tabs
+* Grab parameter for Text Element, Column Element
+* Added tclversion_detailed to get the detailed tkinter version
+* All themes changed the progress bar definition that had a "DEFAULT" indicator. New constant DEFAULT_PROGRESS_BAR_COMPUTE indicates the other theme colors should be used to create the progess bar colors.
+* Added expand_x and expand_y parameters to Columns
+* Fix for Calendar Button.  Still needs to be fixed for read_all_windows
+* Force focus when no-titlebar window. Needed for Raspberry Pi
+* Added Window.force_focus
+* No longer closes the hidden master window. Closing it caused a memory leak within tkinter
+* Disable close on one_line_progress_meter. There is a cancel button that will close the window
+* Changed back toplevel to no parent - was causing problems with timeout=0 windows
+
+## 4.30.0 PySimpleGUI 14-Oct-2020
+
+User Settings APIs, lots more themes, theme swatch previewer, test harness additions
+
+* Added shrink parameter to pin, 
+* added variable Window.maximized, 
+* added main_sdk_help_window function, 
+* New themes - DarkGrey10,DarkGrey11 DarkGrey12 DarkGrey13 DarkGrey14, Python, DarkBrown7
+* Highlight Thickness for Button, Radio, Input elements
+	* Set to 1 now instead of 0 so that focus can be seen
+	* Color is automatically set for buttons, checkboxes, radio buttons
+	* Color can be manually set for Buttons using `highlight_colors` parameter
+	* Only used by Linux
+* user_settings APIs
+	* Whole new set of API calls for handling "user settings"
+	* Settings are saved to json file
+	* For more info, see the documentation
+* Radio.update - added text, background & text colors parameters
+* Multiline & Output Elements:
+	* added parameter echo_stdout_stderr
+	* if True then stdout & stderr will go to the console AND to the Multiline
+* "ver" is shortened version string
+* modal docstring fix in some popups
+* image parameter implemented in popup_scrolled
+* Graph.draw_image - removed color, font, angle parameters
+* fixed blank entry with main program's theme previewer
+* added Window.set_min_size
+* error message function for soft errors
+* focus indicator for Button Checkbox Radio using highlights
+* added main_sdk_help Window
+* added theme_previewer_swatches function
+* added "Buy Me A Coffee" button
+* updated `pin` layout helper function - added `shrink` parameter
+* Main debugger window set to keep on top
+
+## 4.31.0 PySimpleGUI 13-Nov-2020
+
+User Settings class, write_event_value fixes, Menus get colors, Mac no_titlebar patch
+
+* InputText element - Now treating None as '' for default
+* Combo - handling update calls with both disabled and readonly set
+* Spin - readonly 
+	* Added parameter added when creating
+	* Added parameter to update
+* Spin.get() now returns value rather than string version of value
+* Multiline print now autoscrolls by default
+* FileSaveAs and SaveAs now has  default_extension parameter like the popup_get_file has
+* Button Menu - Color and font changes
+	* New create parameters - background color, text color, disabled text color, item font
+	* Fixed problem with button always being flat
+* Menu (Menubar) - Color changes
+	* New create paramters - text color, disabled text color.
+	* Hooked up background color parameter that was already there but not functional
+* write_event_value - fixed race conditions
+	* Window.read() and read_all_windows() now checks the thread queue for events before starting tkinter's mainloop in case events are queued
+* Window.set_cursor added so that window's cursor can be set just like can be set for individual elements
+* Icon is now set when no_window option used on popup_get_file or popup_get_folder
+* Reformatted the theme definitions to save a LOT of lines of code
+* UserSettings class
+	* Added a class interface for User Settings
+	* Can still use the function interface if desired
+	* One advantage of class is that [ ] can be used to get and set entries
+	* Looks and acts much like a "persistent global dictionary"
+	* The User Settings function interfaces now use the class
+* main_get_debug_data() 
+	* Function added that will display a popup and add to the clipboard data needed for GitHub Issues
+	* Added button to Test Harness to display the popup with version data
+* Mac - Added parm enable_mac_notitlebar_patch to set_options to enable apply a "patch" if the Window has no_titlebar set.
+
+## 4.32.0 PySimpleGUI 17-Nov-2020
+
+Menu colors and font, fixes
+
+* Menu, ButtonMenu, and right click menu now default to theme colors and Window font
+	* The background color for menus is the InputText background color
+	* The text color for menus is the InputText text color
+	* The font defaults to the Window font
+	* These theme colors have worked well in the past as they are the settings used for Table and Tree headers
+	* All settings can be changed
+* Added ability to set the right click menu colors and font
+	* New parameters added to Window to control right click look
+* Fixed problem with Button.update. 
+	* Was crashing if button color changed to COLOR_SYSTEM_DEFAULT
+* Fixed problem with right click menus introduced in the previous release
+* Auto-close windows can now be finalized (previously could not do this)
+* Window.read with timeout is faster
+
+## 4.32.1 PySimpleGUI 17-Nov-2020
+
+* Bug in finalize code
+
+## Upcoming
+
+The future for PySimpleGUI looks bright!  
+
+The overall roadmap is a simple one:
+* Continue to build-out the tkinter port
+* Continue to bring features forward from the tkinter port to the other ports (Qt, WxPython, Remi)
+* Add mobile applications (native built applications instead of PyDriod3 that's used today)
 
 ## Code Condition
 
@@ -7247,7 +8217,7 @@ In addition to the ports there is ongoing work with educators that want to bring
 
 It's a recipe for success if done right.  PySimpleGUI has completed the "Make it run" phase.  It's far from "right" in many ways.  These are being worked on.  The module has historically been particularly poor for PEP8 compliance.  It was a learning exercise that turned into a somewhat complete GUI solution for lightweight problems.
 
-While the internals to PySimpleGUI are a tad sketchy, the public interfaces into the SDK are more strictly defined and comply with PEP8 naming conventions.  A set of "PEP8 Bindings" was released in summar 2019 to ensure the enternally facing interfaces all adhere to PEP8 names.
+While the internals to PySimpleGUI are a tad sketchy, the public interfaces into the SDK are more strictly defined and comply with PEP8 naming conventions.  A set of "PEP8 Bindings" was released in summer of 2019 to ensure the externally facing interfaces all adhere to PEP8 names.
 
 Please log bugs and suggestions **only on the PySimpleGUI GitHub**!  It will only make the code stronger and better in the end, a good thing for us all, right?  Logging them elsewhere doesn't enable the core developer and other PySimpleGUI users to help.  To make matters worse, you may get bad advice from other sites because there are simply not many PySimpleGUI experts, yet.
 
@@ -7299,4 +8269,4 @@ If you've helped, I sure hope that you feel like you've been properly thanked.  
 
 In response to a number of email contacts from individuals and corporations that are using PySimpleGUI that wanted to financially support the project a "Support" Button was added to the GitHub site.  This support button is connected with a PayPal account.  If you wish to help support this currently freely supplied software and free technical support, then follow this link: www.paypal.me/psgui . 
 
-To be clear, this is not a solicitation for your money.  No one is being directly asked to support / contribute.  The project is self-funded and there are ongoing costs just to offer the software (URLs, ReadTheDocs, etc). If you're a corporate user and find that PySimpleGUI is helping you financially, that's awesome.  If you want to help ensure PySimpleGUI has a future, you now have that option to help.  It's likely that at some point the costs will become too high for the project to continue, but until then we'll all enjoy the successes we're having.
+To be clear, this is not a solicitation for your money.  No one is being directly asked to support / contribute.  The project is self-funded and there are ongoing costs just to offer the software (URLs, ReadTheDocs, etc). If you're a corporate user and find that PySimpleGUI is helping you financially, that's awesome.  If you want to help ensure PySimpleGUI has a future, you now have that option to help.  It's likely that at some point the costs will become too high for the project to continue to be free, but until then we'll all enjoy the successes we're having.

@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-version = __version__ = "0.17.1.2 Unreleased\n VSeparator added (spelling error), Radio.reset_group added and removed the clearing all when one cleared"
+version = __version__ = "0.17.1.5 Unreleased\n VSeparator added (spelling error), Radio.reset_group added and removed the clearing all when one cleared, added default key for one_line_progress_meter, auto-add keys to tables & trees, added theme_add_new"
 
 port = 'PySimpleGUIWx'
 
@@ -955,7 +955,7 @@ class Spin(Element):
 class Multiline(Element):
     def __init__(self, default_text='', enter_submits=False, disabled=False, autoscroll=False, size=(None, None),
                  auto_size_text=None, background_color=None, text_color=None, change_submits=False, enable_events=False, do_not_clear=True,
-                 key=None, focus=False, font=None, pad=None, tooltip=None, visible=True, size_px=(None,None)):
+                 key=None, write_only=False, focus=False, font=None, pad=None, tooltip=None, visible=True, size_px=(None,None)):
         '''
         Multiline Element
         :param default_text:
@@ -982,6 +982,7 @@ class Multiline(Element):
         self.Autoscroll = autoscroll
         self.Disabled = disabled
         self.ChangeSubmits = change_submits or enable_events
+        self.WriteOnly = write_only
 
         self.Widget = self.WxTextCtrl = None
 
@@ -3259,6 +3260,7 @@ class Window:
                                         ELEM_TYPE_INPUT_SLIDER, ELEM_TYPE_GRAPH, ELEM_TYPE_IMAGE,
                                         ELEM_TYPE_INPUT_CHECKBOX, ELEM_TYPE_INPUT_LISTBOX, ELEM_TYPE_INPUT_COMBO,
                                         ELEM_TYPE_INPUT_MULTILINE, ELEM_TYPE_INPUT_OPTION_MENU, ELEM_TYPE_INPUT_SPIN,
+                                        ELEM_TYPE_TABLE, ELEM_TYPE_TREE,
                                         ELEM_TYPE_INPUT_TEXT):
                         element.Key = top_window.DictionaryKeyCounter
                         top_window.DictionaryKeyCounter += 1
@@ -4000,6 +4002,8 @@ def BuildResultsForSubform(form, initialize_only, top_level_form):
                     except:
                         value = 0
                 elif element.Type == ELEM_TYPE_INPUT_MULTILINE:
+                    if element.WriteOnly:
+                        continue
                     try:
                         value = element.WxTextCtrl.GetValue()
                     except:
@@ -5639,7 +5643,7 @@ class QuickMeter(object):
         return self.stat_messages
 
 
-def OneLineProgressMeter(title, current_value, max_value, key, *args, orientation='v', bar_color=(None, None),
+def OneLineProgressMeter(title, current_value, max_value, key='OK for 1 meter', *args, orientation='v', bar_color=(None, None),
                          button_color=None, size=DEFAULT_PROGRESS_BAR_SIZE, border_width=None, grab_anywhere=False):
     if key not in QuickMeter.active_meters:
         meter = QuickMeter(title, current_value, max_value, key, *args, orientation=orientation, bar_color=bar_color,
@@ -5652,7 +5656,7 @@ def OneLineProgressMeter(title, current_value, max_value, key, *args, orientatio
     OneLineProgressMeter.exit_reasons = getattr(OneLineProgressMeter,'exit_reasons', QuickMeter.exit_reasons)
     return rc == METER_OK
 
-def OneLineProgressMeterCancel(key):
+def OneLineProgressMeterCancel(key='OK for 1 meter'):
     try:
         meter = QuickMeter.active_meters[key]
         meter.window.Close()
@@ -7132,6 +7136,23 @@ def theme_list():
     :return: List[str] - A sorted list of the currently available color themes
     """
     return list_of_look_and_feel_values()
+
+
+def theme_add_new(new_theme_name, new_theme_dict):
+    """
+    Add a new theme to the dictionary of themes
+
+    :param new_theme_name: text to display in element
+    :type new_theme_name: (str)
+    :param new_theme_dict: text to display in element
+    :type new_theme_dict: (dict)
+    """
+    global LOOK_AND_FEEL_TABLE
+    try:
+        LOOK_AND_FEEL_TABLE[new_theme_name] = new_theme_dict
+    except Exception as e:
+        print('Exception during adding new theme {}'.format(e))
+
 
 
 def theme_previewer(columns=12):
