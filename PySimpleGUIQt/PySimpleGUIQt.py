@@ -1,7 +1,5 @@
 #!/usr/bin/python3
-from PySimpleGUI import Column
-
-version = __version__ = "0.35.0.17 Unreleased\nMassive update of docstrings (thanks nngogol), default for slider tick interval set automatically now, margins added to Window but not yet hooked up, VSeparator added (spelling error), added Radio.reset_group and removed clearing all when one of them is cleared (recent change), added default key for one_line_progress_meter, auto-add keys to tables & trees, InputText element gets new disabled-readonly foreground and background color settings and also a readonly parameter, InputText gets border_width parameter, fixed up some docstrings, popup gets new image and any_key_closes parms, input type popups also get image parameter, error checks for trying to manipulate a window prior to finalize, added a dummy Element.expand method, added theme_add_new, added Window.set_title, updated to the latest themes from tktiner port, big styles update (thanks nngogol!), more Styles work, changed popup text layout to match tkinter port, fixed vertical alignment in row, added margin to some elements, renamed styles related variables"
+version = __version__ = "0.35.0.18.1 Unreleased\nMassive update of docstrings (thanks nngogol), default for slider tick interval set automatically now, margins added to Window but not yet hooked up, VSeparator added (spelling error), added Radio.reset_group and removed clearing all when one of them is cleared (recent change), added default key for one_line_progress_meter, auto-add keys to tables & trees, InputText element gets new disabled-readonly foreground and background color settings and also a readonly parameter, InputText gets border_width parameter, fixed up some docstrings, popup gets new image and any_key_closes parms, input type popups also get image parameter, error checks for trying to manipulate a window prior to finalize, added a dummy Element.expand method, added theme_add_new, added Window.set_title, updated to the latest themes from tktiner port, big styles update (thanks nngogol!), more Styles work, changed popup text layout to match tkinter port, fixed vertical alignment in row, added margin to some elements, renamed styles related variables, window margin support but be careful. Added back the truncated portion"
 
 __version__ = version.split()[0]    # For PEP 396 and PEP 345
 
@@ -92,7 +90,7 @@ def TimerStop():
 DEFAULT_WINDOW_ICON = DEFAULT_BASE64_ICON
 DEFAULT_ELEMENT_SIZE = (250, 22)  # In PIXELS
 DEFAULT_BUTTON_ELEMENT_SIZE = (80, 25 )  # In PIXELS
-DEFAULT_MARGINS = (10, 5)  # Margins for each LEFT/RIGHT margin is first term
+DEFAULT_MARGINS = (0,0)   # For Qt, use a Column element with padding to get same effect as tkinter port
 DEFAULT_ELEMENT_PADDING = (4, 2)  # Padding between elements (row, col) in pixels
 # DEFAULT_ELEMENT_PADDING = (0, 0)  # Padding between elements (row, col) in pixels
 DEFAULT_PIXELS_TO_CHARS_SCALING = (10,35)      # 1 character represents x by y pixels
@@ -130,7 +128,7 @@ OFFICIAL_PYSIMPLEGUI_BUTTON_COLOR = ('white', BLUES[0])  # Colors should never b
 
 
 CURRENT_LOOK_AND_FEEL = 'DarkBlue3'
-# CURRENT_LOOK_AND_FEEL = 'DarkRed'
+# CURRENT_LOOK_AND_FEEL = 'Dark Red'
 
 DEFAULT_ERROR_BUTTON_COLOR = ("#FFFFFF", "#FF0000")
 DEFAULT_BACKGROUND_COLOR = None
@@ -2394,8 +2392,8 @@ class Graph(Element):
         pen = QPen(qcolor)
         qcolor = QColor(fill_color)
         brush = QBrush(qcolor)
-        circle_id = self.QT_QGraphicsScene.addEllipse(self.x+converted_point[0], self.y+converted_point[1],
-                                           radius, radius, pen=pen, brush=brush)
+        circle_id = self.QT_QGraphicsScene.addEllipse(self.x + converted_point[0] - radius, self.y + converted_point[1] - radius,
+                                                      radius * 2, radius * 2, pen=pen, brush=brush)
         return circle_id            # type: QGraphicsEllipseItem
 
     def RelocateFigure(self, id, x, y):
@@ -2550,7 +2548,7 @@ class Graph(Element):
 #                           Frame                                        #
 # ---------------------------------------------------------------------- #
 class Frame(Element):
-    def __init__(self, title, layout, title_color=None, background_color=None, title_location=None,
+    def __init__(self, title, layout, title_color=None, background_color=None, title_location=None, frame_color=None,
                  relief=DEFAULT_FRAME_RELIEF, element_justification='float', size=(None, None), font=None, pad=None, border_width=None, key=None, k=None,
                  tooltip=None, visible=True, size_px=(None,None), metadata=None):
         """
@@ -2564,6 +2562,8 @@ class Frame(Element):
         :type background_color: (str)
         :param title_location: location to place the text title.  Choices include: TITLE_LOCATION_TOP TITLE_LOCATION_BOTTOM TITLE_LOCATION_LEFT TITLE_LOCATION_RIGHT TITLE_LOCATION_TOP_LEFT TITLE_LOCATION_TOP_RIGHT TITLE_LOCATION_BOTTOM_LEFT TITLE_LOCATION_BOTTOM_RIGHT
         :type title_location: (enum)
+        :param frame_color: color of the frame lines
+        :type frame_color: (str)
         :param relief: relief style. Values are same as other elements with reliefs. Choices include RELIEF_RAISED RELIEF_SUNKEN RELIEF_FLAT RELIEF_RIDGE RELIEF_GROOVE RELIEF_SOLID
         :type relief: (enum)
         :param element_justification: All elements inside the Frame will have this justification 'left', 'right', 'center' are valid values
@@ -2605,6 +2605,7 @@ class Frame(Element):
         self.BorderWidth = border_width
         self.BackgroundColor = background_color if background_color is not None else DEFAULT_BACKGROUND_COLOR
         self.ElementJustification = element_justification
+        self.FrameColor = frame_color
         self.Widget = self.QT_QGroupBox = None              # type: QGroupBox
         self.Layout(layout)
 
@@ -4114,6 +4115,7 @@ class Window:
         self.metadata = metadata
         self.ElementJustification = element_justification
         self.AllKeysDict = {}
+        self.margins = margins
 
         if layout is not None:
             self.Layout(layout)
@@ -6256,6 +6258,10 @@ def PackFormIntoFrame(container_elem, containing_frame, toplevel_win):
                 element = element   # type: Combo
                 element.Widget = element.QT_ComboBox = QComboBox()
 
+                items_as_strings = [str(v) for v in element.Values]
+                # element.QT_ComboBox.addItems(element.Values)
+                element.QT_ComboBox.addItems(items_as_strings)
+
                 # === style ===
                 style = QtStyle('QComboBox')
                 style['font'] = create_style_from_font(font)
@@ -6263,25 +6269,22 @@ def PackFormIntoFrame(container_elem, containing_frame, toplevel_win):
                 style['background_color'] = (element.BackgroundColor, COLOR_SYSTEM_DEFAULT)
                 style['border'] = '{}px solid gray '.format(border_depth)
                 style['margin'] = full_element_pad
-                # style2 = Style('QListView')
-                # style2['color'] = (element.TextColor, COLOR_SYSTEM_DEFAULT)
-                # style2['background_color'] = (element.BackgroundColor, COLOR_SYSTEM_DEFAULT)
 
-                element.QT_ComboBox.setStyleSheet(style.build_css_string())# content+style2.content)
-                element.qt_styles = (style,)
+                style2 = QtStyle('QListView')
+                style2['color'] = (element.TextColor, COLOR_SYSTEM_DEFAULT)
+                style2['background_color'] = (element.BackgroundColor, COLOR_SYSTEM_DEFAULT)
+
+                element.QT_ComboBox.setStyleSheet(str(style)+str(style2))
+                element.qt_styles = (style, style2)
                 # === style === end
 
-                if not auto_size_text:
-                    if element_size[0] is not None:
-                        element.QT_ComboBox.setFixedWidth(element_size[0])
-                    if element_size[1] is not None:
-                        element.QT_ComboBox.setFixedHeight(element_size[1])
+                if element_size[0] is not None:
+                    element.QT_ComboBox.setFixedWidth(element_size[0])
+                if element_size[1] is not None:
+                    element.QT_ComboBox.setFixedHeight(element_size[1])
 
                 if element.Disabled:
                     element.QT_ComboBox.setDisabled(True)
-                items_as_strings = [str(v) for v in element.Values]
-                # element.QT_ComboBox.addItems(element.Values)
-                element.QT_ComboBox.addItems(items_as_strings)
 
                 element.QT_ComboBox.setMaxVisibleItems(element.VisibleItems)
                 if element.DefaultValue is not None:
@@ -6797,6 +6800,7 @@ def PackFormIntoFrame(container_elem, containing_frame, toplevel_win):
                 qt_row_layout.addWidget(element.QT_QPushButton, alignment=Qt.AlignVCenter)
             # -------------------------  Frame placement element  ------------------------- #
             elif element_type == ELEM_TYPE_FRAME:
+                element = element       # type: Frame
                 element.Widget = column_widget = QGroupBox()
                 element.QT_QGroupBox = column_widget
 
@@ -6807,36 +6811,83 @@ def PackFormIntoFrame(container_elem, containing_frame, toplevel_win):
                 if element.BackgroundColor is not None: style['background-color'] = element.BackgroundColor
                 # style['origin'] = 'margin'
                 style['font'] = create_style_from_font(font)
+                if element.FrameColor is not None:
+                    style['border'] = '{}px solid {} '.format(border_depth, element.FrameColor)
+                else:
+                    style['border'] = '{}px solid {} '.format(border_depth, 'gainsboro')    # default to a light gray
+
+
                 # style['padding'] = (10,10,10,10)
                 # style['margin'] = full_element_pad
-                # style['padding'] = (15,15,15,15)
+                # style['padding'] = (0,15,15,15)
                 # style['padding'] = (10,10,10,10)
-                # style['margin'] = (20,20,20,20)
-                style_title = QtStyle('QGroupBox::title')
-                style_title['padding'] =  (0,0,0,0)
-                style_title['margin'] =  (0,0,0,0)
-                style_title['subcontrol-origin'] = 'border'
-                # style_title['subcontrol-position'] = 'top left'
-                # column_widget.setStyleSheet(str(style)+str(style_title))
-                column_widget.setStyleSheet(str(style))
-                # print(element.Widget.styleSheet())
+                style['margin-top'] = '10px'
+                # style['top'] = '60px'
+                # style['margin'] = (0,0,0,0)
+                style['origin'] = 'margin'
 
+                style_title = QtStyle('QGroupBox::title')
+                # style_title['padding'] =  (0,5,0,5)
+                style_title['margin'] = (0,0,0,0)
+
+                style_title['left'] =  '15px'
+                # style_title['margin-top'] =  '-20px'
+                # style_title['top'] =  '20px'
+                style_title['subcontrol-origin'] = 'margin'
+                # style_title['subcontrol-origin'] = 'border'
+
+                # style_title['subcontrol-origin'] = 'padding'
+                style_title['subcontrol-position'] = 'top left'
+
+                column_widget.setStyleSheet(str(style)+str(style_title))
+                # column_widget.setStyleSheet(str(style))
+                # print(element.Widget.styleSheet())
                 element.qt_styles = (style, )
                 # === style === end
 
-
                 column_widget.setTitle(element.Title)
+
                 column_layout, column_vbox = QFormLayout(), QVBoxLayout()
                 PackFormIntoFrame(element, column_layout, toplevel_win)
                 column_vbox.addLayout(column_layout)
                 column_widget.setLayout(column_vbox)
+
+                # Add a padding groupbox
+                pad_layout, pad_vbox = QFormLayout(), QVBoxLayout()
+                pad_groupbox = QGroupBox()
+
+                pad_vbox.addLayout(pad_layout)
+                pad_groupbox.setLayout(pad_vbox)
+                pad_vbox.addWidget(column_widget)
+
+                pad_layout.setSpacing(0)
+                pad_vbox.setSpacing(0)
+                # === style ===
+                style = QtStyle('QGroupBox')
+                # style['font'] = create_style_from_font(font)
+                style['border'] = '0px'
+                style['margin'] = (0,0,0,0)
+                # style['margin'] = full_element_pad
+
+                style['padding'] = (0,0,0,0)
+                style['margin-top'] = '0px'
+                style['origin'] = 'content'
+                style_title = QtStyle('QGroupBox::title')
+                style_title['subcontrol-origin'] = 'content'
+
+                style_title['padding'] =  (0,0,0,0)
+                style_title['margin'] = (0,0,0,0)
+                pad_groupbox.setStyleSheet(str(style)+str(style_title))
+                # === style === end
+
+
                 if element.Tooltip:
                     column_widget.setToolTip(element.Tooltip)
                 if not element.Visible:
                     element.QT_QGroupBox.setVisible(False)
 
-
-                qt_row_layout.addWidget(column_widget)
+                qt_row_layout.addWidget(pad_groupbox)
+                # qt_row_layout.addWidget(column_widget)
             # -------------------------  Tab placement element  ------------------------- #
             elif element_type == ELEM_TYPE_TAB:
                 element.Widget = tab_widget = QWidget()
@@ -7224,8 +7275,8 @@ def stop_timer(timer):
 def StartupTK(window):
     """
     Does the building of the window with all the widgets
-    :param my_flex_form: you window object
-    :type my_flex_form: (Window)
+    :param window: you window object
+    :type window: (Window)
     """
 
     global using_pyqt5
@@ -7285,12 +7336,26 @@ def StartupTK(window):
     #     window.QTWindow.setWindowFlags(Qt.WindowStaysOnTopHint)
 
 
-    # style = 'QMainWindow {'
-    # style = window.QT_QMainWindow.styleSheet()
+    style = QtStyle('QMainWindow')
     if window.BackgroundColor is not None and window.BackgroundColor != COLOR_SYSTEM_DEFAULT:
-        style = 'background-color: %s;' % window.BackgroundColor
-        # style += '}'
-        window.QT_QMainWindow.setStyleSheet(style)
+        style['background-color'] = window.BackgroundColor
+        window.QT_QMainWindow.setStyleSheet(str(style))
+
+    if window.margins != (None, None):
+        margin_left = margin_right = margin_top = margin_bottom = 0
+        if isinstance(window.margins[0], tuple):
+            margin_left = window.margins[0][0]
+            margin_right = window.margins[0][1]
+        elif isinstance(window.margins[0], int):
+            margin_left = window.margins[0]
+            margin_right = window.margins[0]
+        if isinstance(window.margins[1], tuple):
+            margin_top = window.margins[1][0]
+            margin_bottom = window.margins[1][1]
+        elif isinstance(window.margins[1], int):
+            margin_top = window.margins[1]
+            margin_bottom = window.margins[1]
+        window.QT_QMainWindow.setContentsMargins(margin_left, margin_top, margin_right, margin_bottom)
 
     if window.BackgroundImage is not None:
         qlabel = QLabel(window.QTWindow)
@@ -9704,7 +9769,7 @@ def main():
                     key='_LISTBOX_', font='Courier 12', text_color='red',)],
         [Combo([1,2,3], size=(200, 35), tooltip='Combo', visible_items=2, key='_COMBO_')],
         [Spin([1, 2, 3], size=(40, 30), tooltip='Spinner', key='_SPIN1_')],
-        [Spin(['Combo item 1', 'Combo item 2', 'Combo item 3'], size=(240, 30), tooltip='Spinner', key='_SPIN2_')],
+        [Spin(['Spin item 1', 'Spin item 2', 'Spin item 3'], size=(240, 30), tooltip='Spinner', key='_SPIN2_')],
     ]
 
     frame3 = [
@@ -9745,9 +9810,10 @@ def main():
         [Text('VERSION {}'.format(ver), size=(85,1), text_color='yellow', font='ANY 18')],
 
         # [Image(data_base64=logo, tooltip='Image', click_submits=True, key='_IMAGE_'),
-         [Frame('Input Text Group', frame1, title_color='yellow', tooltip='Text Group', font='Courier 20'), Stretch()],
-        [Frame('Multiple Choice Group', frame2, title_color='green'),
-         Frame('Binary Choice Group', frame3, title_color='purple'),
+         [Frame('Input Text Group', frame1, title_color='yellow', tooltip='Text Group', frame_color='yellow', pad=(0,0)), Stretch()],
+        [Frame('Multiple Choice Group', frame2, title_color=theme_text_color(), frame_color='yellow'),
+         # Column([[Frame('Binary Choice Group', frame3, frame_color='white', title_color='white')]], pad=(0,0)),
+         Frame('Binary Choice Group', frame3, frame_color='white', title_color='white'),
          Frame('Variable Choice Group', frame4, title_color='blue'), Stretch()],
         [Frame('Structured Data Group', frame5, title_color='yellow'), ],
         # [Frame('Graphing Group', frame6)],
@@ -9761,9 +9827,10 @@ def main():
 
     window = Window('Window Title', layout,
                        font=('Helvetica', 13),
-                       default_button_element_size=(100, 30),
-                       auto_size_buttons=False,
+                       # default_button_element_size=(100, 30),
+                       # auto_size_buttons=False,
                        default_element_size=(200, 22),
+                        # margins = (40,40),
                        # border_depth=1,
                        )
     # graph_elem.DrawCircle((200, 200), 50, 'blue')
